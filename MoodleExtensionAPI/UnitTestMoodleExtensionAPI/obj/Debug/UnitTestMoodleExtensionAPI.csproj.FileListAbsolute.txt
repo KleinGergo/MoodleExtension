@@ -1,0 +1,17 @@
+D:\!Suli\SZakdoga\MoodleExtensionAPI\MoodleExtension\MoodleExtensionAPI\UnitTestMoodleExtensionAPI\obj\Debug\UnitTestMoodleExtensionAPI.csproj.AssemblyReference.cache
+D:\!Suli\SZakdoga\MoodleExtensionAPI\MoodleExtension\MoodleExtensionAPI\UnitTestMoodleExtensionAPI\obj\Debug\UnitTestMoodleExtensionAPI.csproj.CoreCompileInputs.cache
+D:\!Suli\SZakdoga\MoodleExtensionAPI\MoodleExtension\MoodleExtensionAPI\UnitTestMoodleExtensionAPI\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.dll
+D:\!Suli\SZakdoga\MoodleExtensionAPI\MoodleExtension\MoodleExtensionAPI\UnitTestMoodleExtensionAPI\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.Interface.dll
+D:\!Suli\SZakdoga\MoodleExtensionAPI\MoodleExtension\MoodleExtensionAPI\UnitTestMoodleExtensionAPI\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.dll
+D:\!Suli\SZakdoga\MoodleExtensionAPI\MoodleExtension\MoodleExtensionAPI\UnitTestMoodleExtensionAPI\bin\Debug\Microsoft.TestPlatform.AdapterUtilities.dll
+D:\!Suli\SZakdoga\MoodleExtensionAPI\MoodleExtension\MoodleExtensionAPI\UnitTestMoodleExtensionAPI\bin\Debug\UnitTestMoodleExtensionAPI.dll
+D:\!Suli\SZakdoga\MoodleExtensionAPI\MoodleExtension\MoodleExtensionAPI\UnitTestMoodleExtensionAPI\bin\Debug\UnitTestMoodleExtensionAPI.pdb
+D:\!Suli\SZakdoga\MoodleExtensionAPI\MoodleExtension\MoodleExtensionAPI\UnitTestMoodleExtensionAPI\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.dll
+D:\!Suli\SZakdoga\MoodleExtensionAPI\MoodleExtension\MoodleExtensionAPI\UnitTestMoodleExtensionAPI\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll
+D:\!Suli\SZakdoga\MoodleExtensionAPI\MoodleExtension\MoodleExtensionAPI\UnitTestMoodleExtensionAPI\bin\Debug\Newtonsoft.Json.dll
+D:\!Suli\SZakdoga\MoodleExtensionAPI\MoodleExtension\MoodleExtensionAPI\UnitTestMoodleExtensionAPI\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.xml
+D:\!Suli\SZakdoga\MoodleExtensionAPI\MoodleExtension\MoodleExtensionAPI\UnitTestMoodleExtensionAPI\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.xml
+D:\!Suli\SZakdoga\MoodleExtensionAPI\MoodleExtension\MoodleExtensionAPI\UnitTestMoodleExtensionAPI\bin\Debug\Newtonsoft.Json.xml
+D:\!Suli\SZakdoga\MoodleExtensionAPI\MoodleExtension\MoodleExtensionAPI\UnitTestMoodleExtensionAPI\obj\Debug\UnitTestMoodleExtensionAPI.csproj.CopyComplete
+D:\!Suli\SZakdoga\MoodleExtensionAPI\MoodleExtension\MoodleExtensionAPI\UnitTestMoodleExtensionAPI\obj\Debug\UnitTestMoodleExtensionAPI.dll
+D:\!Suli\SZakdoga\MoodleExtensionAPI\MoodleExtension\MoodleExtensionAPI\UnitTestMoodleExtensionAPI\obj\Debug\UnitTestMoodleExtensionAPI.pdb

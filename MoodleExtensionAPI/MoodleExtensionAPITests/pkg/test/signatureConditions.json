@@ -1,0 +1,31 @@
+{
+  "signatureCondition": {
+    "type": "complex",
+    "conditions": [
+      {
+        "type": "assigment",
+        "required": true
+      },
+      {
+        "type": "multipleAssigment",
+        "required": true
+      },
+      {
+        "type": "testPercentage",
+        "minimumPercentage": 75
+      },
+      {
+        "type": "allTestsWritten",
+        "required": false
+      },
+      {
+        "type": "smallTestsWritten",
+        "required": true
+      },
+      {
+        "type": "individualTestPercentage",
+        "minimumPercentage": 60
+      }
+    ]
+  }
+}
