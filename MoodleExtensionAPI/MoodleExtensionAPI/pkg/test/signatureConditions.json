@@ -1,15 +1,16 @@
 {
-  "signitureCondition": {
+  "signatureCondition": {
     "type": "complex",
     "conditions": [
       {
         "type": "assigment",
         "required": true
       },
-	  {
+      {
         "type": "multipleAssigment",
-        "required": true
-      }
+        "required": true,
+        "numberOfAssigments": 2
+      },
       {
         "type": "testPercentage",
         "minimumPercentage": 75

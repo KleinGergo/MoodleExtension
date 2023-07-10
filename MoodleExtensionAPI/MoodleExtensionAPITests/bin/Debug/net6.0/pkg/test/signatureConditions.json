@@ -8,7 +8,8 @@
       },
       {
         "type": "multipleAssigment",
-        "required": true
+        "required": true,
+        "numberOfAssigments": 2
       },
       {
         "type": "testPercentage",
@@ -16,11 +17,13 @@
       },
       {
         "type": "allTestsWritten",
-        "required": false
+        "required": false,
+        "numberOfTests":  3
       },
       {
         "type": "smallTestsWritten",
-        "required": true
+        "required": true,
+        "numberOfSmallTests":  5
       },
       {
         "type": "individualTestPercentage",
