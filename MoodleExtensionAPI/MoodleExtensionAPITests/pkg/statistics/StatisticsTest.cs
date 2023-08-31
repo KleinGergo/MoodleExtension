@@ -56,7 +56,6 @@ namespace MoodleExtensionAPI.Models.Tests
             List<Test> mockTests = CreateMockTests();
             Test mockTest = new Test(
              TestID: 1,
-             SubjectID: "VEMISAB123213",
              Result: 0.88,
              StartDate: DateTime.Now,
              CompletionDate: DateTime.Now,
@@ -65,6 +64,15 @@ namespace MoodleExtensionAPI.Models.Tests
              IsCompleted: true,
              Type: "assigment"
              );
+            Subject mockSubject = new Subject(
+                SubjectID: "VEMISAB123213",
+                DepartmentID: 1,
+                SubjectName: "mockSubject",
+                numberOfTests: 1,
+                SignatureState: "NotApproved",
+                SignatureCondition: "none"
+               );
+            mockTest.SubjectID.Add(mockSubject);
             mockTests.Add(mockTest);
             SignatureCondition conditions = readConditionFromJson("pkg/test/signatureConditions.json");
             Subject sub = new Subject();
@@ -76,7 +84,6 @@ namespace MoodleExtensionAPI.Models.Tests
         {
             Test mockTest1 = new Test(
              TestID: 1,
-             SubjectID: "VEMISAB123213",
              Result: 0.88,
              StartDate: DateTime.Now,
              CompletionDate: DateTime.Now,
@@ -85,9 +92,17 @@ namespace MoodleExtensionAPI.Models.Tests
              IsCompleted: true,
              Type: "moodle"
              );
+            Subject mockSubject = new Subject(
+                SubjectID: "VEMISAB123213",
+                DepartmentID: 1,
+                SubjectName: "mockSubject",
+                numberOfTests: 1,
+                SignatureState: "NotApproved",
+                SignatureCondition: "none"
+               );
+            mockTest1.SubjectID.Add(mockSubject);
             Test mockTest2 = new Test(
-             TestID: 2,
-             SubjectID: "VEMISAB123213",
+             TestID: 2,      
              Result: 0.67,
              StartDate: DateTime.Now,
              CompletionDate: DateTime.Now,
@@ -95,9 +110,9 @@ namespace MoodleExtensionAPI.Models.Tests
              TimeLimit: 300,
              IsCompleted: true,
              Type: "moodle");
+            mockTest2.SubjectID.Add(mockSubject);
             Test mockTest3 = new Test(
              TestID: 3,
-             SubjectID: "VEMISAB123213",
              Result: 0.78,
              StartDate: DateTime.Now,
              CompletionDate: DateTime.Now,
@@ -105,6 +120,7 @@ namespace MoodleExtensionAPI.Models.Tests
              TimeLimit: 300,
              IsCompleted: true,
              Type: "moodle");
+            mockTest3.SubjectID.Add(mockSubject);
             List<Test> list = new List<Test>();
             list.Add(mockTest1);
             list.Add(mockTest2);
