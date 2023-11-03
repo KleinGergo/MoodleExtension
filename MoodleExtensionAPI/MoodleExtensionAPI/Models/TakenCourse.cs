@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace MoodleExtensionAPI.Models
 {
@@ -12,14 +6,14 @@ namespace MoodleExtensionAPI.Models
     {
         [Key]
         public int TakenCourseID { get; set; }
-        public int TeacherID { get; set; }
-        public Teacher Teacher { get; set; }
-        public string SubjectID { get; set; }
-        public Subject Subject { get; set; }
-        public int SemesterID { get; set; }
-        public Semester Semester { get; set; }
-        public string Neptuncode { get; set; }
-        public Student Student { get; set; }
+
+        public ICollection<Teacher> Teachers { get; set; } = new List<Teacher>();
+        public Subject? Subject { get; set; }
+        public ICollection<Semester> Semesters { get; set; } = new List<Semester>();
+        public ICollection<Student> Students { get; set; } = new List<Student>();
+        public string? SignatureState { get; set; }
+        public int? Grade { get; set; }
+        public int? OfferedGrade { get; set; }
 
     }
 }

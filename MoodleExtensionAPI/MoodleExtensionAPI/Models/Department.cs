@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace MoodleExtensionAPI.Models
 {
@@ -13,10 +7,7 @@ namespace MoodleExtensionAPI.Models
         [Key]
         public int ID { get; set; }
         public string? Name { get; set; }
-
-        public int TrainingID { get; set; }
-        public Training Training { get; set;}
-        public int TeacherID { get; set; }
-        public Teacher Teacher { get; set;}
+        public ICollection<Teacher> Teachers { get; } = new List<Teacher>();
+        public ICollection<Training> Trainings { get; } = new List<Training>();
     }
 }

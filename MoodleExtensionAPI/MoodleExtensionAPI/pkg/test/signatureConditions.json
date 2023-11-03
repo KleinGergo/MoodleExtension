@@ -1,33 +1,14 @@
 {
-  "signatureCondition": {
-    "type": "complex",
-    "conditions": [
+  "SignatureCondition": {
+    "Type": "complex",
+    "Conditions": [
       {
-        "type": "assigment",
-        "required": true
-      },
-      {
-        "type": "multipleAssigment",
-        "required": true,
-        "numberOfAssigments": 2
-      },
-      {
-        "type": "testPercentage",
-        "minimumPercentage": 75
-      },
-      {
-        "type": "allTestsWritten",
-        "required": false,
-        "numberOfTests": 3
-      },
-      {
-        "type": "smallTestsWritten",
-        "required": true,
-        "numberOfSmallTests": 5
-      },
-      {
-        "type": "individualTestPercentage",
-        "minimumPercentage": 60
+        "Type": "multipleAssigment",
+        "NumberOfAssigments": "2",
+        "RequiredNumberOfAssigments": "1",
+        "RequiredAvgAssigmentPercentage": "50",
+        "RequiredIndividualAssigmentPercentage": "50",
+        "Weight": "100"
       }
     ]
   }

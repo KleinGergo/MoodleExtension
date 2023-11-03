@@ -19,7 +19,11 @@ namespace MoodleExtensionAPI.Models
             set { Password = value; }
         }
         public string? Email { get; set; }
-        public ICollection<Department> DepartmentID { get; }
-        public ICollection<TakenCourse> TakenCourses { get; }
+        public Department Department { get; set; }
+        public ICollection<TakenCourse> TakenCourses { get; } = new List<TakenCourse>();
+        public bool IsPasswordChanged { get; set; } = false;
+
     }
+
+
 }

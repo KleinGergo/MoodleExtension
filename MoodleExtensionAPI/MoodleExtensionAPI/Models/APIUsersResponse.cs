@@ -22,7 +22,7 @@
         public int sortorder { get; set; }
     }
 
-    public class RAPIUsersResponse
+    public class APIUsersResponse
     {
         public int id { get; set; }
         public string username { get; set; }

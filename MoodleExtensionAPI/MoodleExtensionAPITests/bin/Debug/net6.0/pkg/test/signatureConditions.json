@@ -1,33 +1,44 @@
 {
-  "signatureCondition": {
-    "type": "complex",
-    "conditions": [
+  "SignatureCondition": {
+    "Type": "complex",
+    "Conditions": [
       {
-        "type": "assigment",
-        "required": true
+        "Type": "multipleAssigment",
+        "NumberOfAssigments": 2,
+        "RequiredNumberOfAssigments": 2,
+        "RequiredIndividualAssigmentPercentage": 60.0,
+        "RequiredAvgAssigmentPercentage": 75.0,
+        "Weight": 0.1
       },
       {
-        "type": "multipleAssigment",
-        "required": true,
-        "numberOfAssigments": 2
+        "Type": "bigTests",
+        "NumberOfBigTests": 5,
+        "RequiredNumberOfBigTests": 2,
+        "RequiredIndividualBigTestPercentage": 60.0,
+        "RequiredAvgBigTestPercentage": 75.0,
+        "Weight": 0.7
       },
       {
-        "type": "testPercentage",
-        "minimumPercentage": 75
+        "Type": "smallTests",
+        "NumberOfSmallTests": 5,
+        "RequiredNumberOfSmallTests": 2,
+        "RequiredIndividualSmallTestPercentage": 60.0,
+        "RequiredAvgSmallTestPercentage": 75.0,
+        "Weight": 0.2
       },
       {
-        "type": "allTestsWritten",
-        "required": false,
-        "numberOfTests":  3
+        "Type": "grading",
+        "GradeAPercentage": 80.0,
+        "GradeBPercentage": 70.0,
+        "GradeCPercentage": 60.0,
+        "GradeDPercentage": 50.0
       },
       {
-        "type": "smallTestsWritten",
-        "required": true,
-        "numberOfSmallTests":  5
-      },
-      {
-        "type": "individualTestPercentage",
-        "minimumPercentage": 60
+        "Type": "offeredGrade",
+        "OfferedGradeAPercentage": 90.0,
+        "OfferedGradeBPercentage": 80.0,
+        "OfferedGradeCPercentage": 80.0,
+        "OfferedGradeDPercentage": 80.0
       }
     ]
   }

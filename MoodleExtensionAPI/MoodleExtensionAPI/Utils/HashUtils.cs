@@ -3,7 +3,7 @@ using System.Text;
 
 public static class HashUtils
 {
-    public static string HashPassword(string password)
+    public static string HashString(string password)
     {
         using (SHA256 sha256 = SHA256.Create())
         {
