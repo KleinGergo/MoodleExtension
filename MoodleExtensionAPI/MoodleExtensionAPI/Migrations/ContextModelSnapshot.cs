@@ -98,9 +98,6 @@ namespace MoodleExtensionAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SubjectID"));
 
-                    b.Property<int?>("DepartmentID")
-                        .HasColumnType("int");
-
                     b.Property<string>("SignatureCondition")
                         .HasColumnType("nvarchar(max)");
 
@@ -111,8 +108,6 @@ namespace MoodleExtensionAPI.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("SubjectID");
-
-                    b.HasIndex("DepartmentID");
 
                     b.ToTable("Subjects");
                 });
@@ -152,7 +147,7 @@ namespace MoodleExtensionAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
-                    b.Property<int>("DepartmentID")
+                    b.Property<int?>("DepartmentID")
                         .HasColumnType("int");
 
                     b.Property<string>("Email")
@@ -161,11 +156,13 @@ namespace MoodleExtensionAPI.Migrations
                     b.Property<bool>("IsPasswordChanged")
                         .HasColumnType("bit");
 
+                    b.Property<int>("MoodleID")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PasswordDb")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("Password");
 
@@ -184,37 +181,31 @@ namespace MoodleExtensionAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TestID"));
 
-                    b.Property<DateTime>("CompletionDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<double>("GradeMax")
+                    b.Property<double?>("GradeMax")
                         .HasColumnType("float");
 
-                    b.Property<double>("GradeMin")
+                    b.Property<double?>("GradeMin")
                         .HasColumnType("float");
 
-                    b.Property<bool>("IsCompleted")
+                    b.Property<bool?>("IsCompleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("Label")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("MoodleTestID")
+                        .HasColumnType("int");
+
                     b.Property<int?>("PreviousTestID")
                         .HasColumnType("int");
 
-                    b.Property<double>("Result")
+                    b.Property<double?>("Result")
                         .HasColumnType("float");
 
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
+                    b.Property<int>("StudentID")
+                        .HasColumnType("int");
 
                     b.Property<int>("SubjectID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TimeLimit")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TimeSpent")
                         .HasColumnType("int");
 
                     b.Property<string>("Type")
@@ -222,6 +213,8 @@ namespace MoodleExtensionAPI.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("TestID");
+
+                    b.HasIndex("StudentID");
 
                     b.HasIndex("SubjectID");
 
@@ -236,7 +229,7 @@ namespace MoodleExtensionAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
-                    b.Property<int>("DepartmentID")
+                    b.Property<int?>("DepartmentID")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -279,21 +272,6 @@ namespace MoodleExtensionAPI.Migrations
                     b.ToTable("StudentTakenCourse");
                 });
 
-            modelBuilder.Entity("StudentTest", b =>
-                {
-                    b.Property<int>("StudentsID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TestsTestID")
-                        .HasColumnType("int");
-
-                    b.HasKey("StudentsID", "TestsTestID");
-
-                    b.HasIndex("TestsTestID");
-
-                    b.ToTable("StudentTest");
-                });
-
             modelBuilder.Entity("TakenCourseTeacher", b =>
                 {
                     b.Property<int>("TakenCoursesTakenCourseID")
@@ -309,15 +287,6 @@ namespace MoodleExtensionAPI.Migrations
                     b.ToTable("TakenCourseTeacher");
                 });
 
-            modelBuilder.Entity("MoodleExtensionAPI.Models.Subject", b =>
-                {
-                    b.HasOne("MoodleExtensionAPI.Models.Department", "Department")
-                        .WithMany()
-                        .HasForeignKey("DepartmentID");
-
-                    b.Navigation("Department");
-                });
-
             modelBuilder.Entity("MoodleExtensionAPI.Models.TakenCourse", b =>
                 {
                     b.HasOne("MoodleExtensionAPI.Models.Subject", "Subject")
@@ -329,35 +298,35 @@ namespace MoodleExtensionAPI.Migrations
 
             modelBuilder.Entity("MoodleExtensionAPI.Models.Teacher", b =>
                 {
-                    b.HasOne("MoodleExtensionAPI.Models.Department", "Department")
+                    b.HasOne("MoodleExtensionAPI.Models.Department", null)
                         .WithMany("Teachers")
-                        .HasForeignKey("DepartmentID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Department");
+                        .HasForeignKey("DepartmentID");
                 });
 
             modelBuilder.Entity("MoodleExtensionAPI.Models.Test", b =>
                 {
+                    b.HasOne("MoodleExtensionAPI.Models.Student", "Student")
+                        .WithMany("Tests")
+                        .HasForeignKey("StudentID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("MoodleExtensionAPI.Models.Subject", "Subject")
                         .WithMany("Tests")
                         .HasForeignKey("SubjectID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Student");
+
                     b.Navigation("Subject");
                 });
 
             modelBuilder.Entity("MoodleExtensionAPI.Models.Training", b =>
                 {
-                    b.HasOne("MoodleExtensionAPI.Models.Department", "Department")
+                    b.HasOne("MoodleExtensionAPI.Models.Department", null)
                         .WithMany("Trainings")
-                        .HasForeignKey("DepartmentID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Department");
+                        .HasForeignKey("DepartmentID");
                 });
 
             modelBuilder.Entity("SemesterTakenCourse", b =>
@@ -390,21 +359,6 @@ namespace MoodleExtensionAPI.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("StudentTest", b =>
-                {
-                    b.HasOne("MoodleExtensionAPI.Models.Student", null)
-                        .WithMany()
-                        .HasForeignKey("StudentsID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MoodleExtensionAPI.Models.Test", null)
-                        .WithMany()
-                        .HasForeignKey("TestsTestID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("TakenCourseTeacher", b =>
                 {
                     b.HasOne("MoodleExtensionAPI.Models.TakenCourse", null)
@@ -425,6 +379,11 @@ namespace MoodleExtensionAPI.Migrations
                     b.Navigation("Teachers");
 
                     b.Navigation("Trainings");
+                });
+
+            modelBuilder.Entity("MoodleExtensionAPI.Models.Student", b =>
+                {
+                    b.Navigation("Tests");
                 });
 
             modelBuilder.Entity("MoodleExtensionAPI.Models.Subject", b =>

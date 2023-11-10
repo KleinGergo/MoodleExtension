@@ -9,10 +9,10 @@ namespace MoodleExtensionAPI.Models
 
         public Subject() { }
 
-        public Subject(int SubjectID, Department Department, string SubjectName, string SignatureCondition)
+        public Subject(int SubjectID, string SubjectName, string SignatureCondition)
         {
             this.SubjectID = SubjectID;
-            this.Department = Department;
+            //this.Department = Department;
             this.SubjectName = SubjectName;
             signatureCondition = SignatureCondition;
         }
@@ -22,8 +22,8 @@ namespace MoodleExtensionAPI.Models
         public int SubjectMoodleID { get; set; }
         public string? SubjectName { get; set; }
         public string? SignatureCondition { get; set; }
-        public ICollection<Test>? Tests { get; set; } = new List<Test>();
-        public Department? Department { get; set; }
+        public List<Test>? Tests { get; } = new();
+        //public Department? Department { get; set; }
 
 
         public SignatureCondition GetSignatureCondition()
@@ -31,7 +31,7 @@ namespace MoodleExtensionAPI.Models
             SignatureCondition sign = JsonSerializer.Deserialize<SignatureCondition>(this.signatureCondition);
             return sign;
         }
-        /*public bool IsSignatureApproved(List<Test> tests, SignatureCondition signatureCondition)
+        public bool IsSignatureApproved(List<Test> tests, SignatureCondition signatureCondition)
         {
             int? requiredAssigments = 0;
             int? completedAssigments = 0;
@@ -40,41 +40,37 @@ namespace MoodleExtensionAPI.Models
             {
                 switch (condition.Type)
                 {
-                    case "assigment":
-                        if (!tests.Any(t => t.IsCompleted && t.Type == "assigment"))
-                            return false;
-                        break;
+
 
                     case "multipleAssigment":
                         requiredAssigments = condition.NumberOfAssigments;
-                        completedAssigments = tests.Count(t => t.IsCompleted && t.Type == "assigment");
+                        completedAssigments = tests.Count(t => t.IsCompleted && t.Type == "assigment" && t.Result > condition.RequiredIndividualAssigmentPercentage);
+                        double? totalAssigmentPercentage = tests.Sum(t => t.IsCompleted && t.Type == "bigTest" ? t.Result : 0.0);
+                        double? averageAssigmentPercentage = totalAssigmentPercentage / completedAssigments;
                         if (completedAssigments < requiredAssigments)
                             return false;
-                        break;
-
-                    case "testPercentage":
-                        double totalPercentage = tests.Sum(t => t.IsCompleted ? t.Result : 0.0);
-                        double averagePercentage = totalPercentage / tests.Count;
-                        if (averagePercentage < condition.MinimumPercentage)
+                        else if (averageAssigmentPercentage < condition.RequiredAvgAssigmentPercentage)
                             return false;
                         break;
 
-                    case "allTestsWritten":
-                        if (condition.required && !tests.All(t => t.IsCompleted))
+                    case "bigTests":
+                        int completedBigTests = tests.Count(t => t.IsCompleted && t.Type == "bigTests" && t.Result > condition.RequiredIndividualBigTestPercentage);
+                        double? totalBigTestPercentage = tests.Sum(t => t.IsCompleted && t.Type == "bigTest" ? t.Result : 0.0);
+                        double? averageBigTestPercentage = totalBigTestPercentage / completedBigTests;
+                        if (averageBigTestPercentage < condition.RequiredAvgBigTestPercentage)
+                            return false;
+                        else if (completedBigTests < condition.RequiredNumberOfBigTests)
                             return false;
                         break;
 
-                    case "smallTestsWritten":
-                        if (!tests.Any(t => t.IsCompleted && t.Type == "smallTestsWritten"))
+                    case "smallTests":
+                        int completedsmallTests = tests.Count(t => t.IsCompleted && t.Type == "smallTests" && t.Result > condition.RequiredIndividualSmallTestPercentage);
+                        double? totalsmallTestsPercentage = tests.Sum(t => t.IsCompleted && t.Type == "smallTests" ? t.Result : 0.0);
+                        double? averagesmallTestsPercentage = totalsmallTestsPercentage / completedsmallTests;
+                        if (averagesmallTestsPercentage < condition.RequiredAvgBigTestPercentage)
                             return false;
-                        break;
-
-                    case "individualTestPercentage":
-                        foreach (var test in tests)
-                        {
-                            if (test.IsCompleted && test.Result < condition.minimumPercentage)
-                                return false;
-                        }
+                        else if (completedsmallTests < condition.RequiredNumberOfSmallTests)
+                            return false;
                         break;
 
                     default:
@@ -83,9 +79,14 @@ namespace MoodleExtensionAPI.Models
             }
 
             return true;
-        }*/
+        }
 
 
     }
 
+
+
+
 }
+
+

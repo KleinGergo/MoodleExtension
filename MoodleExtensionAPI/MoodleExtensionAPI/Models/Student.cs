@@ -12,8 +12,7 @@ namespace MoodleExtensionAPI.Models
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public string? Email { get; set; }
-        public ICollection<Test> Tests { get; set; } = new List<Test>();
-        public ICollection<TakenCourse> TakenCourses { get; set; } = new List<TakenCourse>();
-
+        public List<Test> Tests { get; } = new();
+        public List<TakenCourse> TakenCourses { get; } = new();
     }
 }

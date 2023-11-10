@@ -35,8 +35,8 @@ namespace MoodleExtensionAPI.Models.Tests
             List<Test> mockTests = CreateMockTests();
             SignatureCondition conditions = readConditionFromJson("pkg/test/signatureConditions.json");
             Subject sub = new Subject();
-            //bool IsAprroved = sub.IsSignatureApproved(mockTests, conditions);
-            //Assert.IsFalse(IsAprroved);
+            bool IsAprroved = sub.IsSignatureApproved(mockTests, conditions);
+            Assert.IsFalse(IsAprroved);
 
         }
         [TestMethod()]
@@ -47,7 +47,6 @@ namespace MoodleExtensionAPI.Models.Tests
 
             Subject mockSubject = new Subject(
                 SubjectID: 1,
-                Department: new Department(),
                 SubjectName: "mockSubject",
                 SignatureCondition: "none"
                );
@@ -55,18 +54,15 @@ namespace MoodleExtensionAPI.Models.Tests
              TestID: 1,
              Subject: mockSubject,
              Result: 0.88,
-             StartDate: DateTime.Now,
-             CompletionDate: DateTime.Now,
-             TimeSpent: 10,
-             TimeLimit: 300,
              IsCompleted: true,
-             Type: "assigment"
+             Type: "multipleAssigment",
+             Student: new Student()
              );
             mockTests.Add(mockTest);
             SignatureCondition conditions = readConditionFromJson("pkg/test/signatureConditions.json");
             Subject sub = new Subject();
-            //bool IsAprroved = sub.IsSignatureApproved(mockTests, conditions);
-            //Assert.IsFalse(IsAprroved);
+            bool IsAprroved = sub.IsSignatureApproved(mockTests, conditions);
+            Assert.IsFalse(IsAprroved);
 
         }
         public List<Test> CreateMockTests()
@@ -74,7 +70,6 @@ namespace MoodleExtensionAPI.Models.Tests
 
             Subject mockSubject = new Subject(
                 SubjectID: 1,
-                Department: new Department(),
                 SubjectName: "mockSubject",
                 SignatureCondition: "none"
                );
@@ -82,33 +77,25 @@ namespace MoodleExtensionAPI.Models.Tests
            TestID: 1,
            Subject: mockSubject,
            Result: 0.88,
-           StartDate: DateTime.Now,
-           CompletionDate: DateTime.Now,
-           TimeSpent: 10,
-           TimeLimit: 300,
            IsCompleted: true,
-           Type: "moodle"
+           Type: "moodle",
+           Student: new Student()
            );
             Test mockTest2 = new Test(
              TestID: 2,
              Subject: mockSubject,
              Result: 0.67,
-             StartDate: DateTime.Now,
-             CompletionDate: DateTime.Now,
-             TimeSpent: 10,
-             TimeLimit: 300,
              IsCompleted: true,
-             Type: "moodle");
+             Type: "moodle",
+             Student: new Student()
+             );
             Test mockTest3 = new Test(
              TestID: 3,
              Subject: mockSubject,
              Result: 0.78,
-             StartDate: DateTime.Now,
-             CompletionDate: DateTime.Now,
-             TimeSpent: 10,
-             TimeLimit: 300,
              IsCompleted: true,
-             Type: "moodle");
+             Type: "moodle",
+             Student: new Student());
             List<Test> list = new List<Test>();
             list.Add(mockTest1);
             list.Add(mockTest2);
@@ -128,29 +115,49 @@ namespace MoodleExtensionAPI.Models.Tests
         {
             List<Condition> conditionList = new List<Condition>();
             Condition conditionAssigment = new Condition(
-                Type: Constants.TypeAssigment
+                Type: Constants.TypeMultipleAssigment,
+                NumberOfTest: 2,
+                RequiredNumberOfTest:2,
+                RequiredIndividualTestPercentage:60.0,
+                RequiredAvgTestPercentage:75.0,
+                Weight: 0.1
                 );
             Condition conditionMultipleAssigment = new Condition(
-                Type: Constants.TypeMultipleAssigment
+                Type: Constants.TypeBigTests,
+                NumberOfTest: 5,
+                RequiredNumberOfTest: 2,
+                RequiredIndividualTestPercentage:60.0,
+                RequiredAvgTestPercentage:75.0,
+                Weight:0.7
                 );
             Condition conditionTestPercentage = new Condition(
-                Type: Constants.TypeTestPercentage
+                Type: Constants.TypeSmallTests,
+                NumberOfTest: 5,
+                RequiredNumberOfTest: 2,
+                RequiredIndividualTestPercentage:60.0,
+                RequiredAvgTestPercentage:75.0,
+                Weight:0.2
                 );
             Condition conditionAllTestWritten = new Condition(
-                Type: Constants.TypeAllTestsWritten
+                Type: Constants.TypeGrading,
+                GradeA:80.0,
+                GradeB: 70.0,
+                GradeC: 60.0,
+                GradeD: 50.0
                 );
             Condition smallTestWritten = new Condition(
-                Type: Constants.TypeSmallTestsWritten
+                Type: Constants.TypeOfferedGrade,
+                GradeA:90.0,
+                GradeB: 80.0,
+                GradeC: 80.0,
+                GradeD: 80.0
                 );
-            Condition individualTestPercentage = new Condition(
-                Type: Constants.TypeIndividualTestPercentage
-                );
+
             conditionList.Add(conditionAssigment);
             conditionList.Add(conditionMultipleAssigment);
             conditionList.Add(conditionTestPercentage);
             conditionList.Add(conditionAllTestWritten);
             conditionList.Add(smallTestWritten);
-            conditionList.Add(individualTestPercentage);
 
             return conditionList;
         }

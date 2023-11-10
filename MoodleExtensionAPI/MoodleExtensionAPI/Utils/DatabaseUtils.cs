@@ -1,4 +1,5 @@
-﻿using MoodleExtensionAPI.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using MoodleExtensionAPI.Data;
 using MoodleExtensionAPI.Models;
 
 namespace MoodleExtensionAPI.Utils
@@ -54,7 +55,7 @@ namespace MoodleExtensionAPI.Utils
         {
             using (var context = new Context())
             {
-                Department dep = new Department();
+
                 foreach (var course in courses)
                 {
 
@@ -66,30 +67,167 @@ namespace MoodleExtensionAPI.Utils
                         Subject sub = new Subject();
                         sub.SubjectMoodleID = course.id;
                         sub.SubjectName = course.displayname;
-                        sub.Department = dep;
                         sub.SignatureCondition = "N/A";
-                        sub.Tests = new List<Test>();
                         context.Subjects.Add(sub);
                     }
                 }
                 context.SaveChanges();
             }
         }
-        public static void SaveStudents(List<APIUsersResponse> students)
+
+        public static Student GetStudentByNeptuncode(string Neptuncode)
+        {
+            using (var context = new Context())
+            {
+                return context.Students.FirstOrDefault(student => student.Neptuncode == Neptuncode);
+            }
+        }
+        public static Student GetStudentByMoodleID(int moodleID)
+        {
+            using (var context = new Context())
+            {
+                return context.Students.FirstOrDefault(student => student.MoodleID == moodleID);
+            }
+        }
+        public static void SaveUsers(List<APIUsersResponse> users)
         {
             using (var context = new Context())
             {
 
-                foreach (var student in students)
+                foreach (var user in users)
                 {
-                    Student stud = new Student();
-                    stud.Neptuncode = StringUtils.GetNeptuncode(student.email);
-                    stud.MoodleID = student.id;
-                    stud.Email = student.email;
-                    stud.FirstName = student.firstname; stud.LastName = student.lastname;
-                    context.Students.Add(stud);
+                    if (user.roles[0].roleid == Constants.StudentRoleID)
+                    {
+                        var existingStudent = context.Students.FirstOrDefault(s => s.MoodleID == user.id);
+
+                        if (existingStudent == null)
+                        {
+
+                            Student stud = new Student();
+                            stud.Neptuncode = StringUtils.GetNeptuncode(user.email);
+                            stud.MoodleID = user.id;
+                            stud.Email = user.email;
+                            stud.FirstName = user.firstname; stud.LastName = user.lastname;
+                            context.Students.Add(stud);
+
+                        }
+                    }
+                    else if (user.roles[0].roleid == Constants.TeacherRoleID)
+                    {
+                        var existingTeacher = context.Teachers.FirstOrDefault(t => t.MoodleID == user.id);
+                        if (existingTeacher == null)
+                        {
+                            Teacher teacher = new Teacher();
+                            teacher.MoodleID = user.id;
+                            teacher.Email = user.email;
+                            teacher.Name = user.fullname;
+                            teacher.IsPasswordChanged = false;
+                            context.Teachers.Add(teacher);
+                        }
+                    }
+
+
                 }
                 context.SaveChanges();
+            }
+        }
+        public static void SaveTests(Subject sub, APIGradesResponse tests)
+        {
+            using (var context = new Context())
+            {
+                foreach (var grades in tests.usergrades)
+                {
+
+                    foreach (var item in grades.gradeitems)
+                    {
+                        if (!IsTestSaved(item.id, grades.userid) && item.itemmodule == Constants.Quiz)
+                        {
+
+                            Test newTest = new Test
+                            {
+                                MoodleTestID = item.id,
+                                GradeMax = item.grademax,
+                                GradeMin = item.grademin,
+                                Result = item.graderaw,
+                                Type = item.itemname,
+                                IsCompleted = (item.gradedatesubmitted != null),
+                                Subject = context.Subjects.FirstOrDefault(s => s.SubjectMoodleID == sub.SubjectMoodleID),
+                                Student = context.Students.FirstOrDefault(s => s.MoodleID == grades.userid)
+                            };
+                            context.Tests.Add(newTest);
+
+                        }
+
+                    }
+                }
+                // Save changes to the database, including the tests and their associations with students.
+                context.SaveChanges();
+            }
+        }
+        public static List<Test> GetStudentTestResults(string Neptuncode, Subject sub)
+        {
+            using (var context = new Context())
+            {
+                List<Test> tests = context.Tests
+                    .Where(e => e.Student.Neptuncode == Neptuncode && e.Subject.SubjectID == sub.SubjectID)
+                    .ToList();
+
+                return tests;
+            }
+        }
+        public static List<Test> GetTestsForSubject(Subject sub)
+        {
+            using (var context = new Context())
+            {
+
+                List<Test> tests = context.Tests.Include(e => e.Student).Where(e => e.Subject.SubjectID == sub.SubjectID).Select(p => new
+                {
+                    p.TestID,
+                    p.Result,
+                    p.Student,
+                    p.GradeMax,
+                    p.MoodleTestID,
+                    p.IsCompleted,
+                    p.Type,
+                    p.PreviousTestID,
+                    p.Label
+                }).AsEnumerable().Select(
+                    p => new Test
+                    {
+                        Result = p.Result,
+                        TestID = p.TestID,
+                        GradeMax = p.GradeMax,
+                        MoodleTestID = p.MoodleTestID,
+                        Student = p.Student,
+                        IsCompleted = p.IsCompleted,
+                        Type = p.Type,
+                        PreviousTestID = p.PreviousTestID,
+                        Label = p.Label
+                    }).ToList();
+
+                return tests;
+            }
+
+        }
+
+
+        public static bool IsTestSaved(int moodleTestID, int studentMoodleID)
+        {
+            using (var context = new Context())
+            {
+                return (context.Tests.FirstOrDefault(t => t.MoodleTestID == moodleTestID && t.Student.MoodleID == studentMoodleID) != null);
+            }
+
+        }
+        public static bool IsTestWritten(int moodleTestID, int studentMoodleID)
+        {
+            using (var context = new Context())
+            {
+                if (context.Tests.FirstOrDefault(t => t.MoodleTestID == moodleTestID && t.Student.MoodleID == studentMoodleID) != null)
+                {
+                    return (context.Tests.FirstOrDefault(t => t.MoodleTestID == moodleTestID && t.Student.MoodleID == studentMoodleID).Result != null);
+                }
+                return false;
             }
         }
         public static Subject GetSubject(string subjectIdentifier)
@@ -154,6 +292,7 @@ namespace MoodleExtensionAPI.Utils
         }
 
     }
+
 
 
 }

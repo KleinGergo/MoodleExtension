@@ -10,7 +10,19 @@ namespace MoodleExtensionAPI.Controllers
     public class MoodleAPIController : ControllerBase
     {
         MoodleAPIClient client = new MoodleAPIClient();
-        [HttpGet("courses")]
+
+        [HttpGet("saveUsers")]
+        public async Task<IActionResult> GetStudentsForCourse(string courseIdentifier)
+        {
+            Subject subject = DatabaseUtils.GetSubject(courseIdentifier);
+            if (subject != null)
+            {
+                List<APIUsersResponse> users = await client.GetAPIUsersForCourse(subject.SubjectMoodleID);
+                DatabaseUtils.SaveUsers(users);
+            }
+            return Ok();
+        }
+        [HttpGet("saveCourses")]
         public async Task<IActionResult> GetCourses()
         {
 
@@ -19,13 +31,18 @@ namespace MoodleExtensionAPI.Controllers
 
             return Ok(courses);
         }
-        [HttpGet("results")]
-        public async Task<IActionResult> GetResults(string courseIdentifier)
+        [HttpGet("getStudentResults")]
+        public async Task<IActionResult> GetResults(string Neptuncode, string courseIdentifier)
         {
+            Subject sub = DatabaseUtils.GetSubject(courseIdentifier);
+            if (sub != null)
+            {
+                List<Test> tests = DatabaseUtils.GetStudentTestResults(Neptuncode, sub);
+                if (tests != null)
+                    return Ok(tests);
+            }
 
-            APIGradesResponse grades = await client.GetTestResultsForCourse(courseIdentifier);
-            return Ok(grades);
-
+            return BadRequest("No test results for this student in this course!");
         }
         [HttpPut("addSignatureCondition")]
         public async Task<IActionResult> AddSignatureCondition(string subjectIdentifier, string signatureCondition)
@@ -50,6 +67,21 @@ namespace MoodleExtensionAPI.Controllers
                 }
             }
             return Ok();
+        }
+        [HttpGet("getTestResults")]
+        public async Task<JsonResult> GetTestResultsForCourse(string subjectIdentifier)
+        {
+            if (!DatabaseUtils.CheckIfSubjectExists(subjectIdentifier))
+            {
+                return null;
+            }
+
+            Subject sub = DatabaseUtils.GetSubject(subjectIdentifier);
+            APIGradesResponse grades = await client.GetTestResultsForCourse(sub.SubjectMoodleID.ToString());
+            DatabaseUtils.SaveTests(sub, grades);
+            List<Test> tests = DatabaseUtils.GetTestsForSubject(sub);
+
+            return new JsonResult(tests);
         }
 
     }
