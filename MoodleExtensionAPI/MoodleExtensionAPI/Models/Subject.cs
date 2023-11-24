@@ -133,7 +133,6 @@ namespace MoodleExtensionAPI.Models
         {
 
 
-
             if (signatureCondition != null)
             {
                 foreach (var condition in signatureCondition.Conditions)

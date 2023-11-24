@@ -54,7 +54,7 @@ namespace MoodleExtensionAPI.Utils
 
             return testResult;
         }
-        public static string CalculateForIndividualOfferedGrade(StudentTestSignature studentTestSignature, OfferedGradeCondition offeredGradeConditions, bool isOfferedGradeApproved)
+        public static int CalculateForIndividualOfferedGrade(StudentTestSignature studentTestSignature, OfferedGradeCondition offeredGradeConditions, bool isOfferedGradeApproved)
         {
             foreach (var condition in offeredGradeConditions.Conditions)
             {
@@ -64,21 +64,21 @@ namespace MoodleExtensionAPI.Utils
                         int countAssigment = studentTestSignature.tests.Count(t => t.Type == Constants.TypeMultipleAssigment && t.Result != null);
                         if (countAssigment < condition.RequiredNumberOfAssigments)
                         {
-                            return "Nincs megajánlott jegy";
+                            return 0;
                         }
                         break;
                     case Constants.TypeBigTests:
                         int countBigTests = studentTestSignature.tests.Count(t => t.Type == Constants.TypeBigTests && t.Result != null);
                         if (countBigTests < condition.RequiredNumberOfBigTests)
                         {
-                            return "Nincs megajánlott jegy";
+                            return 0;
                         }
                         break;
                     case Constants.TypeSmallTests:
                         int countSmallTests = studentTestSignature.tests.Count(t => t.Type == Constants.TypeSmallTests && t.Result != null);
                         if (countSmallTests < condition.RequiredNumberOfSmallTests)
                         {
-                            return "Nincs megajánlott jegy";
+                            return 0;
                         }
                         break;
                 }
@@ -86,7 +86,7 @@ namespace MoodleExtensionAPI.Utils
             return GetIndividualOfferedGrade(offeredGradeConditions, studentTestSignature);
         }
 
-        public static string GetIndividualOfferedGrade(OfferedGradeCondition offeredGradeConditions, StudentTestSignature studentTestSignature)
+        public static int GetIndividualOfferedGrade(OfferedGradeCondition offeredGradeConditions, StudentTestSignature studentTestSignature)
         {
             double? requiredIndividualAssigmentPercentage = 0;
             double? requiredIndividualBigTestPercentage = 0;
@@ -143,7 +143,7 @@ namespace MoodleExtensionAPI.Utils
 
             if (numberOfAssigmentsWhichLower > numberOfAssigments - requiredNumberOfAssigments && numberOfAssigmentsWhichLower != null || numberOfBigTestsWhichLower > numberOfBigTests - requiredNumberOfBigTests && numberOfBigTestsWhichLower != null || numberOfSmallTestsWhichLower > numberOfSmallTests - requiredNumberOfSmallTests && numberOfSmallTestsWhichLower != null)
             {
-                return "Nincs megajánlott jegy";
+                return 0;
             }
             double? lowestAssignmentPercentage = studentTestSignature.tests
                 .Where(t => t.Type == Constants.TypeMultipleAssigment && t.Result != null) // Filter tests of a specific type
@@ -158,21 +158,21 @@ namespace MoodleExtensionAPI.Utils
             double? minValue = Math.Min(lowestAssignmentPercentage ?? double.MaxValue, Math.Min(lowestBigTestsPercentage ?? double.MaxValue, lowestSmallTestPercentage ?? double.MaxValue));
             if (minValue >= gradingCondition.OfferedGradeAPercentage && gradingCondition.OfferedGradeAPercentage != 0)
             {
-                return "Jeles";
+                return 5;
             }
             if (minValue >= gradingCondition.OfferedGradeBPercentage && gradingCondition.OfferedGradeBPercentage != 0)
             {
-                return "Jó";
+                return 4;
             }
             if (minValue >= gradingCondition.OfferedGradeCPercentage && gradingCondition.OfferedGradeCPercentage != 0)
             {
-                return "Közepes";
+                return 3;
             }
             if (minValue >= gradingCondition.OfferedGradeDPercentage && gradingCondition.OfferedGradeDPercentage != 0)
             {
-                return "Elégséges";
+                return 2;
             }
-            return "Nincs megajánlott jegy";
+            return 0;
         }
         public static bool IsIndividualOfferedGradeCounts(OfferedGradeCondition conditions)
         {
@@ -185,10 +185,10 @@ namespace MoodleExtensionAPI.Utils
         }
         public static string CalculateOfferedGrade(StudentTestSignature studentTestSignature, OfferedGradeCondition offeredGradeConditions, bool isOfferedGradeApproved)
         {
-            string offeredGrade = "Nincs megajánlott jegy";
+            int offeredGrade = 0;
             if (!isOfferedGradeApproved)
             {
-                return offeredGrade;
+                return "Nincs megajánlott jegy";
             }
             if (IsIndividualOfferedGradeCounts(offeredGradeConditions))
             {
@@ -255,13 +255,61 @@ namespace MoodleExtensionAPI.Utils
                         {
                             smallTestPercentage = (smallTestResults / smallTestMaxPoints) * 100;
                         }
-                        offeredGrade = GetOfferedGrade(assigmentPercentage, bigTestPercentage, smallTestPercentage, gradeConditions);
-                        return offeredGrade;
+                        int? avgOfferedGrade = GetOfferedGrade(assigmentPercentage, bigTestPercentage, smallTestPercentage, gradeConditions);
+                        return GetAppropiateOfferedGrade(offeredGrade, avgOfferedGrade);
                     }
                 }
             }
             return "Nincs megajánlott jegy";
 
+        }
+        static string GetAppropiateOfferedGrade(int grade1, int? grade2)
+        {
+            if (grade1 < grade2)
+            {
+                switch (grade1)
+                {
+                    case 0:
+                        return "Nincs megajánlott jegy";
+                        break;
+                    case 2:
+                        return "Elégséges";
+                        break;
+
+                    case 3:
+                        return "Közepes";
+                        break;
+                    case 4:
+                        return "Jó";
+                        break;
+                    case 5:
+                        return "Jeles";
+                        break;
+                }
+            }
+            else
+            {
+                switch (grade2)
+                {
+                    case 0:
+                        return "Nincs megajánlott jegy";
+                        break;
+                    case 2:
+                        return "Elégséges";
+                        break;
+
+                    case 3:
+                        return "Közepes";
+                        break;
+                    case 4:
+                        return "Jó";
+                        break;
+                    case 5:
+                        return "Jeles";
+                        break;
+                }
+            }
+            return "";
         }
         public static string CalculateFinalGrade(StudentTestSignature studentTestSignature, SignatureCondition SignatureCondition)
         {
@@ -349,7 +397,7 @@ namespace MoodleExtensionAPI.Utils
 
 
         }
-        public static string? GetOfferedGrade(double? assigmentPercentage, double? bigTestPercentage, double? smallTestPercentage, GradeCondition condition)
+        public static int? GetOfferedGrade(double? assigmentPercentage, double? bigTestPercentage, double? smallTestPercentage, GradeCondition condition)
         {
             double divider = 0;
             if (assigmentPercentage != 0)
@@ -367,23 +415,23 @@ namespace MoodleExtensionAPI.Utils
             double? percentage = (assigmentPercentage + bigTestPercentage + smallTestPercentage) / divider;
             if (percentage >= condition.OfferedGradeAPercentage)
             {
-                return "Jeles";
+                return 5;
             }
             else if (percentage >= condition.OfferedGradeBPercentage)
             {
-                return "Jó";
+                return 4;
             }
             else if (percentage >= condition.OfferedGradeCPercentage)
             {
-                return "Közepes";
+                return 3;
             }
             else if (percentage >= condition.OfferedGradeDPercentage)
             {
-                return "Elégséges";
+                return 2;
             }
             else
             {
-                return "Elégtelen";
+                return 0;
             }
         }
         public static string? GetGrade(double? assigmentPercentage, double? bigTestPercentage, double? smallTestPercentage, Condition condition)
