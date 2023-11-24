@@ -12,13 +12,14 @@ namespace MoodleExtensionAPI.Controllers
         MoodleAPIClient client = new MoodleAPIClient();
 
         [HttpGet("saveUsers")]
-        public async Task<IActionResult> GetStudentsForCourse(string courseIdentifier)
+        public async Task<IActionResult> GetUsersForCourse(string courseIdentifier)
         {
             Subject subject = DatabaseUtils.GetSubject(courseIdentifier);
             if (subject != null)
             {
                 List<APIUsersResponse> users = await client.GetAPIUsersForCourse(subject.SubjectMoodleID);
-                DatabaseUtils.SaveUsers(users);
+                if (users != null)
+                    DatabaseUtils.SaveUsers(users, subject.SubjectID);
             }
             return Ok();
         }
@@ -27,9 +28,14 @@ namespace MoodleExtensionAPI.Controllers
         {
 
             List<APICourseResponse> courses = await client.GetAPICourses();
-            DatabaseUtils.SaveCourses(courses);
+            if (courses != null)
+            {
+                DatabaseUtils.SaveCourses(courses);
 
-            return Ok(courses);
+                return Ok(courses);
+            }
+            return BadRequest("There are no courses.");
+
         }
         [HttpGet("getStudentResults")]
         public async Task<IActionResult> GetResults(string Neptuncode, string courseIdentifier)
@@ -41,47 +47,148 @@ namespace MoodleExtensionAPI.Controllers
                 if (tests != null)
                     return Ok(tests);
             }
+            else
+            {
+                List<APICourseResponse> courses = await client.GetAPICourses();
+                if (courses != null)
+                {
+                    DatabaseUtils.SaveCourses(courses);
+                    if (DatabaseUtils.CheckIfSubjectExists(courseIdentifier))
+                    {
+                        List<Test> tests = DatabaseUtils.GetStudentTestResults(Neptuncode, sub);
+                        if (tests != null)
+                            return Ok(tests);
+                    }
+                }
+
+
+            }
 
             return BadRequest("No test results for this student in this course!");
+        }
+
+        [HttpPut("addOfferedGradeCondition")]
+        public async Task<IActionResult> AddOfferedGradeCondition(string subjectIdentifier, string signatureCondition)
+        {
+            try
+            {
+                if (DatabaseUtils.CheckIfSubjectExists(subjectIdentifier))
+                {
+                    Subject subject = DatabaseUtils.GetSubject(subjectIdentifier);
+                    DatabaseUtils.AddOfferedGradeConditionToSubject(subject, signatureCondition);
+
+                }
+                else
+                {
+                    List<APICourseResponse> courses = await client.GetAPICourses();
+                    DatabaseUtils.SaveCourses(courses);
+                    if (!DatabaseUtils.CheckIfSubjectExists(subjectIdentifier))
+                    {
+                        return BadRequest("The subject does not exists!");
+                    }
+                    else
+                    {
+                        Subject subject = DatabaseUtils.GetSubject(subjectIdentifier);
+                        DatabaseUtils.AddOfferedGradeConditionToSubject(subject, signatureCondition);
+                    }
+
+                }
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
         }
         [HttpPut("addSignatureCondition")]
         public async Task<IActionResult> AddSignatureCondition(string subjectIdentifier, string signatureCondition)
         {
-            if (DatabaseUtils.CheckIfSubjectExists(subjectIdentifier))
+            try
             {
-                Subject subject = DatabaseUtils.GetSubject(subjectIdentifier);
-                DatabaseUtils.AddSignatureConditionToSubject(subject, signatureCondition);
-            }
-            else
-            {
-                List<APICourseResponse> courses = await client.GetAPICourses();
-                DatabaseUtils.SaveCourses(courses);
-                if (!DatabaseUtils.CheckIfSubjectExists(subjectIdentifier))
-                {
-                    return BadRequest("The subject does not exists!");
-                }
-                else
+                if (DatabaseUtils.CheckIfSubjectExists(subjectIdentifier))
                 {
                     Subject subject = DatabaseUtils.GetSubject(subjectIdentifier);
                     DatabaseUtils.AddSignatureConditionToSubject(subject, signatureCondition);
                 }
+                else
+                {
+                    List<APICourseResponse> courses = await client.GetAPICourses();
+                    DatabaseUtils.SaveCourses(courses);
+                    if (!DatabaseUtils.CheckIfSubjectExists(subjectIdentifier))
+                    {
+                        return BadRequest("The subject does not exists!");
+                    }
+                    else
+                    {
+                        Subject subject = DatabaseUtils.GetSubject(subjectIdentifier);
+                        DatabaseUtils.AddSignatureConditionToSubject(subject, signatureCondition);
+                    }
+                }
+
+                return Ok();
             }
-            return Ok();
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
         }
         [HttpGet("getTestResults")]
         public async Task<JsonResult> GetTestResultsForCourse(string subjectIdentifier)
         {
-            if (!DatabaseUtils.CheckIfSubjectExists(subjectIdentifier))
+            try
             {
-                return null;
+                if (!DatabaseUtils.CheckIfSubjectExists(subjectIdentifier))
+                {
+                    return new JsonResult(BadRequest("The subject does not exists!"));
+                }
+
+                Subject sub = DatabaseUtils.GetSubject(subjectIdentifier);
+                List<APIUsersResponse> users = await client.GetAPIUsersForCourse(sub.SubjectMoodleID);
+                DatabaseUtils.SaveUsers(users, sub.SubjectID);
+                APIGradesResponse grades = await client.GetTestResultsForCourse(sub.SubjectMoodleID.ToString());
+                DatabaseUtils.SaveTests(sub, grades);
+                List<StudentTestSignatureDTO> testResults = DatabaseUtils.GetStudentTestSignatures(sub);
+                return new JsonResult(testResults);
+
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(ex);
             }
 
-            Subject sub = DatabaseUtils.GetSubject(subjectIdentifier);
-            APIGradesResponse grades = await client.GetTestResultsForCourse(sub.SubjectMoodleID.ToString());
-            DatabaseUtils.SaveTests(sub, grades);
-            List<Test> tests = DatabaseUtils.GetTestsForSubject(sub);
 
-            return new JsonResult(tests);
+
+        }
+
+        [HttpGet("getStatistics")]
+        public async Task<JsonResult> GetStatisticsForCourse(string subjectIdentifier)
+        {
+            try
+            {
+                if (!DatabaseUtils.CheckIfSubjectExists(subjectIdentifier))
+                {
+                    await GetCourses();
+                    if (!DatabaseUtils.CheckIfSubjectExists(subjectIdentifier))
+                    {
+                        return new JsonResult(BadRequest("The subject does not exists!"));
+                    }
+
+                }
+                Subject sub = DatabaseUtils.GetSubject(subjectIdentifier);
+                APIGradesResponse grades = await client.GetTestResultsForCourse(sub.SubjectMoodleID.ToString());
+                DatabaseUtils.SaveTests(sub, grades);
+                List<Test> tests = DatabaseUtils.GetTestsForSubject(sub);
+                List<StudentTestSignatureDTO> testResults = DatabaseUtils.GetStudentTestSignatures(sub);
+                FrontendStatistics frontedData = DatabaseUtils.GetStatisticsForSubject(testResults, sub.SubjectName);
+                return new JsonResult(frontedData);
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(ex);
+            }
+
         }
 
     }

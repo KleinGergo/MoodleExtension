@@ -5,16 +5,15 @@ namespace MoodleExtensionAPI.Models
 {
     public class Subject
     {
-        private string signatureCondition;
+
 
         public Subject() { }
 
         public Subject(int SubjectID, string SubjectName, string SignatureCondition)
         {
             this.SubjectID = SubjectID;
-            //this.Department = Department;
             this.SubjectName = SubjectName;
-            signatureCondition = SignatureCondition;
+            this.SignatureCondition = SignatureCondition;
         }
 
         [Key]
@@ -22,61 +21,172 @@ namespace MoodleExtensionAPI.Models
         public int SubjectMoodleID { get; set; }
         public string? SubjectName { get; set; }
         public string? SignatureCondition { get; set; }
+        public string? OfferedGradeCondition { get; set; }
         public List<Test>? Tests { get; } = new();
-        //public Department? Department { get; set; }
+        public List<Teacher>? Teachers { get; } = new();
 
 
+
+        public OfferedGradeCondition GetOfferedGradeCondition()
+        {
+            try
+            {
+                OfferedGradeConditionWrapper condition = JsonSerializer.Deserialize<OfferedGradeConditionWrapper>(this.OfferedGradeCondition);
+                return condition.GradeCondition;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging
+                Console.WriteLine($"Exception during deserialization: {ex.Message}");
+
+                // Handle or rethrow the exception if appropriate for your case
+                return null;
+            }
+        }
         public SignatureCondition GetSignatureCondition()
         {
-            SignatureCondition sign = JsonSerializer.Deserialize<SignatureCondition>(this.signatureCondition);
-            return sign;
+            try
+            {
+                // Log the JSON string before deserialization
+                Console.WriteLine($"JSON String from database: {this.SignatureCondition}");
+
+                SignatureConditionWrapper sign = JsonSerializer.Deserialize<SignatureConditionWrapper>(this.SignatureCondition);
+
+                // Log the deserialized object for debugging
+                Console.WriteLine($"Deserialized SignatureCondition: {JsonSerializer.Serialize(sign)}");
+
+                return sign.SignatureCondition;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging
+                Console.WriteLine($"Exception during deserialization: {ex.Message}");
+
+                // Handle or rethrow the exception if appropriate for your case
+                return null;
+            }
         }
+
+        // IsOfferedGradeApproved check if the list of tests met with the offered grade conditions.
+        public bool IsOfferedGradeApproved(List<Test> tests, OfferedGradeCondition offeredGradeCondition)
+        {
+            if (offeredGradeCondition != null)
+            {
+                foreach (var condition in offeredGradeCondition.Conditions)
+                {
+                    switch (condition.Type)
+                    {
+
+
+                        case Constants.TypeMultipleAssigment:
+
+                            // Count the number of completed assignments that meet certain criteria
+                            int? completedAssigments = tests.Count(t => t.IsCompleted && t.Type == Constants.TypeMultipleAssigment && (t.Result / t.GradeMax) * 100 > condition.RequiredIndividualAssigmentPercentage);
+                            // Calculate the total result and max points for completed multiple assignments
+                            double? totalAssigmentResult = tests.Sum(t => t.IsCompleted && t.Type == Constants.TypeMultipleAssigment ? t.Result : 0.0);
+                            double? totalAssigmentMaxPoints = tests.Sum(t => t.IsCompleted && t.Type == Constants.TypeMultipleAssigment ? t.GradeMax : 0.0);
+                            // Calculate the average assignment percentage
+                            double? averageAssigmentPercentage = (totalAssigmentResult / totalAssigmentMaxPoints) * 100;
+                            // Check if the completed assignments are less than the required number
+                            if (completedAssigments < condition.RequiredNumberOfAssigments)
+                                return false;
+                            // Check if the average assignment percentage is less than the required percentage
+                            else if (averageAssigmentPercentage < condition.RequiredAvgAssigmentPercentage)
+                                return false;
+                            // If both conditions are met, return true
+                            break;
+
+                        case Constants.TypeBigTests:
+                            int completedBigTests = tests.Count(t => t.IsCompleted && t.Type == Constants.TypeBigTests && (t.Result / t.GradeMax) * 100 > condition.RequiredIndividualBigTestPercentage);
+                            double? totalBigTestPercentage = tests.Sum(t => t.IsCompleted && t.Type == Constants.TypeBigTests ? t.Result : 0.0);
+                            double? totalBigTestMaxPoints = tests.Sum(t => t.IsCompleted && t.Type == Constants.TypeBigTests ? t.GradeMax : 0.0);
+                            double? averageBigTestPercentage = (totalBigTestPercentage / totalBigTestMaxPoints) * 100;
+                            if (averageBigTestPercentage < condition.RequiredAvgBigTestPercentage)
+                                return false;
+                            else if (completedBigTests < condition.RequiredNumberOfBigTests)
+                                return false;
+                            break;
+
+                        case Constants.TypeSmallTests:
+                            int completedSmallTests = tests.Count(t => t.IsCompleted && t.Type == Constants.TypeSmallTests && (t.Result / t.GradeMax) * 100 > condition.RequiredIndividualSmallTestPercentage);
+                            double? totalSmallTestsPercentage = tests.Sum(t => t.IsCompleted && t.Type == Constants.TypeSmallTests ? t.Result : 0.0);
+                            double? totalSmallTestsMaxPoints = tests.Sum(t => t.IsCompleted && t.Type == Constants.TypeSmallTests ? t.GradeMax : 0.0);
+                            double? averageSmallTestsPercentage = (totalSmallTestsPercentage / totalSmallTestsMaxPoints) * 100;
+                            if (averageSmallTestsPercentage < condition.RequiredAvgBigTestPercentage)
+                                return false;
+                            else if (completedSmallTests < condition.RequiredNumberOfSmallTests)
+                                return false;
+                            break;
+
+
+                    }
+
+                }
+                return true;
+            }
+            return false;
+        }
+
+
+        // IsSignatureApproved check if the list of tests, met with the signature condition.
         public bool IsSignatureApproved(List<Test> tests, SignatureCondition signatureCondition)
         {
-            int? requiredAssigments = 0;
-            int? completedAssigments = 0;
 
-            foreach (var condition in signatureCondition.Conditions)
+
+
+            if (signatureCondition != null)
             {
-                switch (condition.Type)
+                foreach (var condition in signatureCondition.Conditions)
                 {
+                    switch (condition.Type)
+                    {
 
 
-                    case "multipleAssigment":
-                        requiredAssigments = condition.NumberOfAssigments;
-                        completedAssigments = tests.Count(t => t.IsCompleted && t.Type == "assigment" && t.Result > condition.RequiredIndividualAssigmentPercentage);
-                        double? totalAssigmentPercentage = tests.Sum(t => t.IsCompleted && t.Type == "bigTest" ? t.Result : 0.0);
-                        double? averageAssigmentPercentage = totalAssigmentPercentage / completedAssigments;
-                        if (completedAssigments < requiredAssigments)
-                            return false;
-                        else if (averageAssigmentPercentage < condition.RequiredAvgAssigmentPercentage)
-                            return false;
-                        break;
+                        case "multipleAssigment":
 
-                    case "bigTests":
-                        int completedBigTests = tests.Count(t => t.IsCompleted && t.Type == "bigTests" && t.Result > condition.RequiredIndividualBigTestPercentage);
-                        double? totalBigTestPercentage = tests.Sum(t => t.IsCompleted && t.Type == "bigTest" ? t.Result : 0.0);
-                        double? averageBigTestPercentage = totalBigTestPercentage / completedBigTests;
-                        if (averageBigTestPercentage < condition.RequiredAvgBigTestPercentage)
-                            return false;
-                        else if (completedBigTests < condition.RequiredNumberOfBigTests)
-                            return false;
-                        break;
+                            // Count the number of completed assignments that meet certain criteria
+                            int? completedAssigments = tests.Count(t => t.IsCompleted && t.Type == Constants.TypeMultipleAssigment && (t.Result / t.GradeMax) * 100 > condition.RequiredIndividualAssigmentPercentage);
+                            // Calculate the total result and max points for completed multiple assignments
+                            double? totalAssigmentResult = tests.Sum(t => t.IsCompleted && t.Type == Constants.TypeMultipleAssigment ? t.Result : 0.0);
+                            double? totalAssigmentMaxPoints = tests.Sum(t => t.IsCompleted && t.Type == Constants.TypeMultipleAssigment ? t.GradeMax : 0.0);
+                            // Calculate the average assignment percentage
+                            double? averageAssigmentPercentage = (totalAssigmentResult / totalAssigmentMaxPoints) * 100;
+                            // Check if the completed assignments are less than the required number
+                            if (completedAssigments < condition.RequiredNumberOfAssigments)
+                                return false;
+                            // Check if the average assignment percentage is less than the required percentage
+                            else if (averageAssigmentPercentage < condition.RequiredAvgAssigmentPercentage)
+                                return false;
+                            // If both conditions are met, return true
+                            break;
 
-                    case "smallTests":
-                        int completedsmallTests = tests.Count(t => t.IsCompleted && t.Type == "smallTests" && t.Result > condition.RequiredIndividualSmallTestPercentage);
-                        double? totalsmallTestsPercentage = tests.Sum(t => t.IsCompleted && t.Type == "smallTests" ? t.Result : 0.0);
-                        double? averagesmallTestsPercentage = totalsmallTestsPercentage / completedsmallTests;
-                        if (averagesmallTestsPercentage < condition.RequiredAvgBigTestPercentage)
-                            return false;
-                        else if (completedsmallTests < condition.RequiredNumberOfSmallTests)
-                            return false;
-                        break;
+                        case "bigTests":
+                            int completedBigTests = tests.Count(t => t.IsCompleted && t.Type == Constants.TypeBigTests && (t.Result / t.GradeMax) * 100 > condition.RequiredIndividualBigTestPercentage);
+                            double? totalBigTestPercentage = tests.Sum(t => t.IsCompleted && t.Type == Constants.TypeBigTests ? t.Result : 0.0);
+                            double? totalBigTestMaxPoints = tests.Sum(t => t.IsCompleted && t.Type == Constants.TypeBigTests ? t.GradeMax : 0.0);
+                            double? averageBigTestPercentage = (totalBigTestPercentage / totalBigTestMaxPoints) * 100;
+                            if (averageBigTestPercentage < condition.RequiredAvgBigTestPercentage)
+                                return false;
+                            else if (completedBigTests < condition.RequiredNumberOfBigTests)
+                                return false;
+                            break;
 
-                    default:
-                        return false; // Unknown condition type
+                        case "smallTests":
+                            int completedSmallTests = tests.Count(t => t.IsCompleted && t.Type == Constants.TypeSmallTests && (t.Result / t.GradeMax) * 100 > condition.RequiredIndividualSmallTestPercentage);
+                            double? totalSmallTestsPercentage = tests.Sum(t => t.IsCompleted && t.Type == Constants.TypeSmallTests ? t.Result : 0.0);
+                            double? totalSmallTestsMaxPoints = tests.Sum(t => t.IsCompleted && t.Type == Constants.TypeSmallTests ? t.GradeMax : 0.0);
+                            double? averageSmallTestsPercentage = (totalSmallTestsPercentage / totalSmallTestsMaxPoints) * 100;
+                            if (averageSmallTestsPercentage < condition.RequiredAvgBigTestPercentage)
+                                return false;
+                            else if (completedSmallTests < condition.RequiredNumberOfSmallTests)
+                                return false;
+                            break;
+
+
+                    }
                 }
             }
+
 
             return true;
         }

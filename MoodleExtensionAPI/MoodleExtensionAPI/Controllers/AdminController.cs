@@ -17,7 +17,7 @@ namespace MoodleExtensionAPI.Controllers
             {
                 if (token != Constants.AuthorizationToken)
                 {
-                    return BadRequest("unauthorized");
+                    return BadRequest("Unauthorized");
                 }
                 List<APICourseResponse> courses = await client.GetAPICourses();
                 if (courses != null)

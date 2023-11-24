@@ -8,7 +8,7 @@
         public int? RequiredNumberOfAssigments { get; set; }
         public double? RequiredIndividualAssigmentPercentage { get; set; }
         public double? RequiredAvgAssigmentPercentage { get; set; }
-        public double Weight { get; set; }
+        public double? Weight { get; set; }
         public int? NumberOfBigTests { get; set; }
         public int? RequiredNumberOfBigTests { get; set; }
         public double? RequiredIndividualBigTestPercentage { get; set; }
@@ -28,9 +28,9 @@
 
         public Condition()
         {
-            
+
         }
-        public Condition(string Type, int NumberOfTest, int RequiredNumberOfTest, double RequiredIndividualTestPercentage,double RequiredAvgTestPercentage, double Weight)
+        public Condition(string Type, int NumberOfTest, int RequiredNumberOfTest, double RequiredIndividualTestPercentage, double RequiredAvgTestPercentage, double Weight)
         {
             this.Type = Type;
             this.Weight = Weight;
@@ -57,7 +57,7 @@
             }
         }
 
-        public Condition (string Type, double GradeA, double GradeB, double GradeC, double GradeD)
+        public Condition(string Type, double GradeA, double GradeB, double GradeC, double GradeD)
         {
             this.Type = Type;
             switch (Type)
@@ -77,16 +77,22 @@
             }
         }
     }
-    
+
     public class SignatureConditionWrapper
     {
         public SignatureCondition SignatureCondition { get; set; }
+        public SignatureConditionWrapper()
+        {
+
+        }
     }
 
     public class SignatureCondition
     {
         public string Type { get; set; }
         public List<Condition> Conditions { get; set; }
+
+        public SignatureCondition() { }
     }
 
 

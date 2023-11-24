@@ -9,7 +9,7 @@ namespace MoodleExtensionAPI.Models
 
         public string Name { get; set; }
         public int Year { get; set; }
-        public ICollection<TakenCourse> TakenCourses { get; } = new List<TakenCourse>();
+        public List<TakenCourse> TakenCourses { get; } = new();
 
     }
 }

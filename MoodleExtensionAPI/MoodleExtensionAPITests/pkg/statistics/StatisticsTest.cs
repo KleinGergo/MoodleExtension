@@ -39,6 +39,94 @@ namespace MoodleExtensionAPI.Models.Tests
             Assert.IsFalse(IsAprroved);
 
         }
+
+        [TestMethod()]
+        public void IsStudentPassedShouldBeTrue()
+        {
+            List<Test> mockTests = CreateMockTestsWhichPass();
+            SignatureCondition conditions = readConditionFromJson("pkg/test/signatureConditions.json");
+            Subject sub = new Subject();
+            bool IsAprroved = sub.IsSignatureApproved(mockTests, conditions);
+            Assert.IsTrue(IsAprroved);
+        }
+        [TestMethod()]
+        public void IsStudentPassedShouldBeFalse()
+        {
+            List<Test> mockTests = CreateMockTestsWhichPass();
+            mockTests[0].Result = 1;
+            SignatureCondition conditions = readConditionFromJson("pkg/test/signatureConditions.json");
+            Subject sub = new Subject();
+            bool IsAprroved = sub.IsSignatureApproved(mockTests, conditions);
+            Assert.IsFalse(IsAprroved);
+        }
+
+        public List<Test> CreateMockTestsWhichPass()
+        {
+            Subject mockSubject = new Subject(
+                SubjectID: 1,
+                SubjectName: "mockSubject",
+                SignatureCondition: "none"
+            );
+            Student mockStudent = new Student();
+            Test mockTest1 = new Test(
+                TestID: 1,
+                Subject: mockSubject,
+                Result: 7,
+                IsCompleted: true,
+                Type: Constants.TypeMultipleAssigment,
+                Student: mockStudent
+            );
+            mockTest1.GradeMax = 10;
+            Test mockTest2 = new Test(
+                TestID: 2,
+                Subject: mockSubject,
+                Result: 8.5,
+                IsCompleted: true,
+                Type: Constants.TypeMultipleAssigment,
+                Student: mockStudent
+            );
+            mockTest2.GradeMax = 10;
+            Test mockTest3 = new Test(
+                TestID: 3,
+                Subject: mockSubject,
+                Result: 7.8,
+                IsCompleted: true,
+                Type: Constants.TypeBigTests,
+                Student: mockStudent);
+            mockTest3.GradeMax = 10;
+            Test mockTest4 = new Test(
+                TestID: 4,
+                Subject: mockSubject,
+                Result: 10,
+                IsCompleted: true,
+                Type: Constants.TypeBigTests,
+                Student: mockStudent);
+            mockTest4.GradeMax = 10;
+            Test mockTest5 = new Test(
+                TestID: 5,
+                Subject: mockSubject,
+                Result: 10,
+                IsCompleted: true,
+                Type: Constants.TypeSmallTests,
+                Student: mockStudent);
+            mockTest5.GradeMax = 10;
+            Test mockTest6 = new Test(
+                TestID: 4,
+                Subject: mockSubject,
+                Result: 10,
+                IsCompleted: true,
+                Type: Constants.TypeSmallTests,
+                Student: mockStudent);
+            mockTest6.GradeMax = 10;
+            List<Test> list = new List<Test>();
+            list.Add(mockTest1);
+            list.Add(mockTest2);
+            list.Add(mockTest3);
+            list.Add(mockTest4);
+            list.Add(mockTest5);
+            list.Add(mockTest6);
+            return list;
+        }
         [TestMethod()]
         public void IsStudentPassedShouldBeFalseBecausOfIndividualTestsResult()
         {
@@ -117,37 +205,37 @@ namespace MoodleExtensionAPI.Models.Tests
             Condition conditionAssigment = new Condition(
                 Type: Constants.TypeMultipleAssigment,
                 NumberOfTest: 2,
-                RequiredNumberOfTest:2,
-                RequiredIndividualTestPercentage:60.0,
-                RequiredAvgTestPercentage:75.0,
+                RequiredNumberOfTest: 2,
+                RequiredIndividualTestPercentage: 60.0,
+                RequiredAvgTestPercentage: 75.0,
                 Weight: 0.1
                 );
             Condition conditionMultipleAssigment = new Condition(
                 Type: Constants.TypeBigTests,
                 NumberOfTest: 5,
                 RequiredNumberOfTest: 2,
-                RequiredIndividualTestPercentage:60.0,
-                RequiredAvgTestPercentage:75.0,
-                Weight:0.7
+                RequiredIndividualTestPercentage: 60.0,
+                RequiredAvgTestPercentage: 75.0,
+                Weight: 0.7
                 );
             Condition conditionTestPercentage = new Condition(
                 Type: Constants.TypeSmallTests,
                 NumberOfTest: 5,
                 RequiredNumberOfTest: 2,
-                RequiredIndividualTestPercentage:60.0,
-                RequiredAvgTestPercentage:75.0,
-                Weight:0.2
+                RequiredIndividualTestPercentage: 60.0,
+                RequiredAvgTestPercentage: 75.0,
+                Weight: 0.2
                 );
             Condition conditionAllTestWritten = new Condition(
                 Type: Constants.TypeGrading,
-                GradeA:80.0,
+                GradeA: 80.0,
                 GradeB: 70.0,
                 GradeC: 60.0,
                 GradeD: 50.0
                 );
             Condition smallTestWritten = new Condition(
                 Type: Constants.TypeOfferedGrade,
-                GradeA:90.0,
+                GradeA: 90.0,
                 GradeB: 80.0,
                 GradeC: 80.0,
                 GradeD: 80.0

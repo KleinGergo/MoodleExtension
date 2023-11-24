@@ -6,6 +6,7 @@
         public List<TestResultDTO> Tests { get; set; }
         public string SignatureStatus { get; set; }
         public string Grade { get; set; }
+        public string OfferedGrade { get; set; }
     }
 
     public class TestResultDTO

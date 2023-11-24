@@ -21,7 +21,7 @@ namespace MoodleExtensionAPI.Models
         }
         public string? Email { get; set; }
         //public Department Department { get; set; }
-        public ICollection<TakenCourse> TakenCourses { get; } = new List<TakenCourse>();
+        public List<Subject>? Subjects { get; } = new();
         public bool IsPasswordChanged { get; set; } = false;
 
     }

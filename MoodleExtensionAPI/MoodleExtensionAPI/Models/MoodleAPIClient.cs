@@ -72,7 +72,7 @@ namespace MoodleExtensionAPI.Models
                 if (response.IsSuccessStatusCode)
                 {
                     string responseContent = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine(responseContent);
+
 
                     // Deserialize the JSON response into a list of APICourseResponse objects
                     grades = JsonConvert.DeserializeObject<APIGradesResponse>(responseContent);

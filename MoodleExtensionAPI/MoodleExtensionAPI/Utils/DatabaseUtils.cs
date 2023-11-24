@@ -2,6 +2,7 @@
 using MoodleExtensionAPI.Data;
 using MoodleExtensionAPI.Models;
 
+
 namespace MoodleExtensionAPI.Utils
 {
     public static class DatabaseUtils
@@ -20,6 +21,23 @@ namespace MoodleExtensionAPI.Utils
             }
 
             return false;
+        }
+        public static async void SaveUsersForAllCourse(MoodleAPIClient client)
+        {
+            List<Subject> subjects = new List<Subject>();
+            using (var context = new Context())
+            {
+                subjects = context.Subjects.ToList();
+            }
+            foreach (var subject in subjects)
+            {
+                if (subject != null)
+                {
+                    List<APIUsersResponse> users = await client.GetAPIUsersForCourse(subject.SubjectMoodleID);
+                    if (users != null)
+                        DatabaseUtils.SaveUsers(users, subject.SubjectID);
+                }
+            }
         }
         public static void UpdatePassword(string email, string currentPassword, string newPassword)
         {
@@ -89,44 +107,88 @@ namespace MoodleExtensionAPI.Utils
                 return context.Students.FirstOrDefault(student => student.MoodleID == moodleID);
             }
         }
-        public static void SaveUsers(List<APIUsersResponse> users)
+
+
+
+
+        public static Subject GetSubjectByTests(List<Test> test)
+        {
+            if (test.Count > 0)
+            {
+                using (var context = new Context())
+                {
+                    return context.Subjects.FirstOrDefault(s => s.SubjectID == test[0].Subject.SubjectID);
+                }
+            }
+            return null;
+
+        }
+
+        public static void SaveUsers(List<APIUsersResponse> users, int subjectID)
         {
             using (var context = new Context())
             {
-
                 foreach (var user in users)
                 {
-                    if (user.roles[0].roleid == Constants.StudentRoleID)
+                    if (user.roles.Count > 0)
                     {
-                        var existingStudent = context.Students.FirstOrDefault(s => s.MoodleID == user.id);
-
-                        if (existingStudent == null)
+                        if (user.roles[0].roleid == Constants.StudentRoleID)
                         {
+                            Student existingStudent = context.Students.FirstOrDefault(s => s.MoodleID == user.id);
 
-                            Student stud = new Student();
-                            stud.Neptuncode = StringUtils.GetNeptuncode(user.email);
-                            stud.MoodleID = user.id;
-                            stud.Email = user.email;
-                            stud.FirstName = user.firstname; stud.LastName = user.lastname;
-                            context.Students.Add(stud);
+                            if (existingStudent == null)
+                            {
 
+                                Student stud = new Student();
+                                stud.Neptuncode = StringUtils.GetNeptuncode(user.email);
+                                stud.MoodleID = user.id;
+                                stud.Email = user.email;
+                                stud.FirstName = user.firstname; stud.LastName = user.lastname;
+                                context.Students.Add(stud);
+                                Subject sub = context.Subjects.FirstOrDefault(t => t.SubjectID == subjectID);
+                                TakenCourse existingTakenCourse = context.TakenCourses.FirstOrDefault(t => t.Subject.SubjectID == subjectID && t.Student.MoodleID == user.id);
+
+                                if (existingTakenCourse == null)
+                                {
+                                    TakenCourse takenCourse = new TakenCourse(sub);
+                                    takenCourse.Student = stud;
+                                    context.TakenCourses.Add(takenCourse);
+                                }
+                                else
+                                {
+                                    existingTakenCourse.Student = context.Students.FirstOrDefault(s => s.ID == existingStudent.ID);
+                                }
+                            }
+                            else
+                            {
+                                Subject sub = context.Subjects.FirstOrDefault(t => t.SubjectID == subjectID);
+                                TakenCourse existingTakenCourse = context.TakenCourses.FirstOrDefault(t => t.Subject.SubjectID == subjectID && t.Student.MoodleID == user.id);
+                                if (existingTakenCourse == null)
+                                {
+                                    TakenCourse takenCourse = new TakenCourse(sub);
+                                    takenCourse.Student = context.Students.FirstOrDefault(s => s.MoodleID == user.id);
+                                    context.TakenCourses.Add(takenCourse);
+                                }
+                                else
+                                {
+                                    existingTakenCourse.Student = context.Students.FirstOrDefault(s => s.ID == existingStudent.ID);
+                                }
+                            }
+                        }
+                        else if (user.roles[0].roleid == Constants.TeacherRoleID)
+                        {
+                            var existingTeacher = context.Teachers.FirstOrDefault(t => t.MoodleID == user.id);
+                            if (existingTeacher == null)
+                            {
+                                Teacher teacher = new Teacher();
+                                teacher.MoodleID = user.id;
+                                teacher.Email = user.email;
+                                teacher.Name = user.fullname;
+                                teacher.IsPasswordChanged = false;
+                                context.Teachers.Add(teacher);
+                            }
                         }
                     }
-                    else if (user.roles[0].roleid == Constants.TeacherRoleID)
-                    {
-                        var existingTeacher = context.Teachers.FirstOrDefault(t => t.MoodleID == user.id);
-                        if (existingTeacher == null)
-                        {
-                            Teacher teacher = new Teacher();
-                            teacher.MoodleID = user.id;
-                            teacher.Email = user.email;
-                            teacher.Name = user.fullname;
-                            teacher.IsPasswordChanged = false;
-                            context.Teachers.Add(teacher);
-                        }
-                    }
-
-
                 }
                 context.SaveChanges();
             }
@@ -149,13 +211,31 @@ namespace MoodleExtensionAPI.Utils
                                 GradeMax = item.grademax,
                                 GradeMin = item.grademin,
                                 Result = item.graderaw,
-                                Type = item.itemname,
+                                Label = item.itemname,
                                 IsCompleted = (item.gradedatesubmitted != null),
                                 Subject = context.Subjects.FirstOrDefault(s => s.SubjectMoodleID == sub.SubjectMoodleID),
-                                Student = context.Students.FirstOrDefault(s => s.MoodleID == grades.userid)
+                                Student = context.Students.FirstOrDefault(s => s.MoodleID == grades.userid),
+
                             };
+                            if (item.itemname.Contains("NagyZH"))
+                            {
+                                newTest.Type = Constants.TypeBigTests;
+                            }
+                            else if (item.itemname.Contains("KisZH"))
+                            {
+                                newTest.Type = Constants.TypeSmallTests;
+                            }
+                            else if (item.itemname.Contains("Beadandó"))
+                            {
+                                newTest.Type = Constants.TypeMultipleAssigment;
+                            }
                             context.Tests.Add(newTest);
 
+                        }
+                        else if (item.itemmodule == Constants.Quiz)
+                        {
+                            Test savedTest = context.Tests.FirstOrDefault(t => t.MoodleTestID == item.id && t.Student.MoodleID == grades.userid);
+                            savedTest.Result = item.graderaw;
                         }
 
                     }
@@ -180,37 +260,140 @@ namespace MoodleExtensionAPI.Utils
             using (var context = new Context())
             {
 
+
                 List<Test> tests = context.Tests.Include(e => e.Student).Where(e => e.Subject.SubjectID == sub.SubjectID).Select(p => new
                 {
-                    p.TestID,
                     p.Result,
                     p.Student,
                     p.GradeMax,
-                    p.MoodleTestID,
-                    p.IsCompleted,
                     p.Type,
-                    p.PreviousTestID,
-                    p.Label
                 }).AsEnumerable().Select(
                     p => new Test
                     {
                         Result = p.Result,
-                        TestID = p.TestID,
                         GradeMax = p.GradeMax,
-                        MoodleTestID = p.MoodleTestID,
                         Student = p.Student,
-                        IsCompleted = p.IsCompleted,
                         Type = p.Type,
-                        PreviousTestID = p.PreviousTestID,
-                        Label = p.Label
                     }).ToList();
 
                 return tests;
             }
 
         }
+        public static FrontendStatistics GetStatisticsForSubject(List<StudentTestSignatureDTO> studentTestSignatureDTOs, string subjectName)
+        {
+            FrontendStatistics frontendStatistics = new FrontendStatistics();
+            frontendStatistics.SubjectName = subjectName;
+            frontendStatistics.TotalSignatures = 0;
+            frontendStatistics.TotalNumberOfPassedStudents = 0;
+            frontendStatistics.TotalTests = 0;
+            FrontendChartData frontendChartDataGradeA = new FrontendChartData(Constants.GradeA);
+            FrontendChartData frontendChartDataGradeB = new FrontendChartData(Constants.GradeB);
+            FrontendChartData frontendChartDataGradeC = new FrontendChartData(Constants.GradeC);
+            FrontendChartData frontendChartDataGradeD = new FrontendChartData(Constants.GradeD);
+            FrontendChartData frontendChartDataGradeF = new FrontendChartData(Constants.GradeF);
+            foreach (var st in studentTestSignatureDTOs)
+            {
+                frontendStatistics.TotalTests += st.Tests.Count;
+                if (st.SignatureStatus == Constants.SignatureApproved)
+                    frontendStatistics.TotalSignatures += 1;
+                if (st.Grade != Constants.GradeF)
+                    frontendStatistics.TotalNumberOfPassedStudents += 1;
+                if (st.Grade == Constants.GradeF)
+                    frontendChartDataGradeF.Jegy++;
+                if (st.Grade == Constants.GradeD)
+                    frontendChartDataGradeD.Jegy++;
+                if (st.Grade == Constants.GradeC)
+                    frontendChartDataGradeC.Jegy++;
+                if (st.Grade == Constants.GradeB)
+                    frontendChartDataGradeB.Jegy++;
+                if (st.Grade == Constants.GradeA)
+                    frontendChartDataGradeA.Jegy++;
+            }
+            frontendStatistics.frontendChartData.Add(frontendChartDataGradeA);
+            frontendStatistics.frontendChartData.Add(frontendChartDataGradeB);
+            frontendStatistics.frontendChartData.Add(frontendChartDataGradeC);
+            frontendStatistics.frontendChartData.Add(frontendChartDataGradeD);
+            frontendStatistics.frontendChartData.Add(frontendChartDataGradeF);
 
+            return frontendStatistics;
 
+        }
+        public static List<StudentTestSignatureDTO> GetStudentTestSignatures(Subject sub)
+        {
+            List<StudentTestSignatureDTO> results = new List<StudentTestSignatureDTO>();
+            List<Student> students = new List<Student>();
+            using (var context = new Context())
+            {
+                students = context.TakenCourses
+              .Include(tc => tc.Student)
+              .Where(tc => tc.Subject.SubjectID == sub.SubjectID)
+              .Select(tc => tc.Student)
+              .ToList();
+
+                foreach (var stud in students)
+                {
+                    List<Test> studTests = GetTestsForStudent(stud, sub);
+                    SignatureCondition signatureCondition = sub.GetSignatureCondition();
+                    bool isSignatureApproved = sub.IsSignatureApproved(studTests, signatureCondition);
+                    StudentTestSignature signature = new StudentTestSignature();
+                    if (isSignatureApproved)
+                    {
+                        signature.Student = stud;
+                        signature.tests = studTests;
+                        signature.SignatureStatus = "approved";
+                    }
+                    else
+                    {
+                        signature.Student = stud;
+                        signature.tests = studTests;
+                        signature.SignatureStatus = "denied";
+                    }
+                    signature.Grade = Utils.CalculateFinalGrade(signature, sub.GetSignatureCondition());
+                    OfferedGradeCondition condition = sub.GetOfferedGradeCondition();
+                    bool isOfferedGradeApproved = sub.IsOfferedGradeApproved(studTests, condition);
+                    signature.OfferedGrade = Utils.CalculateOfferedGrade(signature, condition, isOfferedGradeApproved);
+                    var signatureDTO = new StudentTestSignatureDTO
+                    {
+                        NeptunCode = stud.Neptuncode,
+                        Tests = studTests.Select(test => new TestResultDTO
+                        {
+                            TestName = test.Label,
+                            Result = test.Result,
+                            Type = test.Type,
+                            GradeMax = test.GradeMax// Assuming Test class has a property named "Result"
+                        }).ToList(),
+                        SignatureStatus = signature.SignatureStatus,
+                        Grade = signature.Grade,
+                        OfferedGrade = signature.OfferedGrade
+                    };
+                    TakenCourse takenCourse = context.TakenCourses.FirstOrDefault(tc => tc.Subject.SubjectID == sub.SubjectID && tc.Student.Neptuncode == stud.Neptuncode);
+                    takenCourse.SignatureState = signature.SignatureStatus;
+                    takenCourse.Grade = signature.Grade;
+                    takenCourse.OfferedGrade = signature.OfferedGrade;
+                    context.SaveChanges();
+                    results.Add(signatureDTO);
+
+                }
+            }
+
+            return results;
+
+        }
+        public static List<Test> GetTestsForStudent(Student student, Subject sub)
+        {
+            List<Test> tests = new List<Test>();
+            using (var context = new Context())
+            {
+                tests = context.Subjects
+            .Include(s => s.Tests)
+            .Where(s => s.SubjectID == sub.SubjectID) // Assuming SubjectID is the identifier for the subject
+            .SelectMany(s => s.Tests)
+            .Where(t => t.Student.ID == student.ID)
+            .ToList();
+            }
+            return tests;
+        }
         public static bool IsTestSaved(int moodleTestID, int studentMoodleID)
         {
             using (var context = new Context())
@@ -261,6 +444,20 @@ namespace MoodleExtensionAPI.Utils
 
             return false;
         }
+        public static void AddOfferedGradeConditionToSubject(Subject sub, string offeredGradeCondition)
+        {
+            using (var context = new Context())
+            {
+                foreach (var subject in context.Subjects)
+                {
+                    if (subject.SubjectID == sub.SubjectID)
+                    {
+                        subject.OfferedGradeCondition = offeredGradeCondition;
+                    }
+                }
+                context.SaveChanges();
+            }
+        }
         public static void AddSignatureConditionToSubject(Subject sub, string signatureCondition)
         {
             using (var context = new Context())
@@ -275,6 +472,7 @@ namespace MoodleExtensionAPI.Utils
                 context.SaveChanges();
             }
         }
+
         public static List<Test> GetResultsForSubject(string subjectIdentifier)
         {
             List<Test> results = new List<Test>();

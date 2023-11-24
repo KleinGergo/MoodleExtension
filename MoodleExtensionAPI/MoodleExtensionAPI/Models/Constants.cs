@@ -15,6 +15,13 @@ public class Constants
     public const int TeacherRoleID = 3;
     public const int StudentRoleID = 5;
     public const string Quiz = "quiz";
+    public const string SignatureApproved = "approved";
+    public const string GradeA = "Jeles";
+    public const string GradeB = "Jó";
+    public const string GradeC = "Közepes";
+    public const string GradeD = "Elégséges";
+    public const string GradeF = "Elégtelen";
+    public const string AuthorizationToken = "64921d2d-2db9-4581-9d35-ce8c1f302d95";
 
 }
 

@@ -5,7 +5,7 @@ namespace MoodleExtensionAPI.Data
 {
     public class Context : DbContext
     {
-        public DbSet<Department> Departments { get; set; } = null!;
+
         public DbSet<Semester> Semesters { get; set; } = null!;
         public DbSet<Student> Students { get; set; } = null!;
         public DbSet<Subject> Subjects { get; set; } = null!;
