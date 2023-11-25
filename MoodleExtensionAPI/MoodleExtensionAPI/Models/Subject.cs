@@ -81,7 +81,7 @@ namespace MoodleExtensionAPI.Models
                         case Constants.TypeMultipleAssigment:
 
                             // Count the number of completed assignments that meet certain criteria
-                            int? completedAssigments = tests.Count(t => t.IsCompleted && t.Type == Constants.TypeMultipleAssigment && (t.Result / t.GradeMax) * 100 > condition.RequiredIndividualAssigmentPercentage);
+                            int? completedAssigments = tests.Count(t => t.IsCompleted && t.Type == Constants.TypeMultipleAssigment && (t.Result / t.GradeMax) * 100 >= condition.RequiredIndividualAssigmentPercentage);
                             // Calculate the total result and max points for completed multiple assignments
                             double? totalAssigmentResult = tests.Sum(t => t.IsCompleted && t.Type == Constants.TypeMultipleAssigment ? t.Result : 0.0);
                             double? totalAssigmentMaxPoints = tests.Sum(t => t.IsCompleted && t.Type == Constants.TypeMultipleAssigment ? t.GradeMax : 0.0);
@@ -97,7 +97,7 @@ namespace MoodleExtensionAPI.Models
                             break;
 
                         case Constants.TypeBigTests:
-                            int completedBigTests = tests.Count(t => t.IsCompleted && t.Type == Constants.TypeBigTests && (t.Result / t.GradeMax) * 100 > condition.RequiredIndividualBigTestPercentage);
+                            int completedBigTests = tests.Count(t => t.IsCompleted && t.Type == Constants.TypeBigTests && (t.Result / t.GradeMax) * 100 >= condition.RequiredIndividualBigTestPercentage);
                             double? totalBigTestPercentage = tests.Sum(t => t.IsCompleted && t.Type == Constants.TypeBigTests ? t.Result : 0.0);
                             double? totalBigTestMaxPoints = tests.Sum(t => t.IsCompleted && t.Type == Constants.TypeBigTests ? t.GradeMax : 0.0);
                             double? averageBigTestPercentage = (totalBigTestPercentage / totalBigTestMaxPoints) * 100;
@@ -108,7 +108,7 @@ namespace MoodleExtensionAPI.Models
                             break;
 
                         case Constants.TypeSmallTests:
-                            int completedSmallTests = tests.Count(t => t.IsCompleted && t.Type == Constants.TypeSmallTests && (t.Result / t.GradeMax) * 100 > condition.RequiredIndividualSmallTestPercentage);
+                            int completedSmallTests = tests.Count(t => t.IsCompleted && t.Type == Constants.TypeSmallTests && (t.Result / t.GradeMax) * 100 >= condition.RequiredIndividualSmallTestPercentage);
                             double? totalSmallTestsPercentage = tests.Sum(t => t.IsCompleted && t.Type == Constants.TypeSmallTests ? t.Result : 0.0);
                             double? totalSmallTestsMaxPoints = tests.Sum(t => t.IsCompleted && t.Type == Constants.TypeSmallTests ? t.GradeMax : 0.0);
                             double? averageSmallTestsPercentage = (totalSmallTestsPercentage / totalSmallTestsMaxPoints) * 100;
@@ -144,7 +144,7 @@ namespace MoodleExtensionAPI.Models
                         case "multipleAssigment":
 
                             // Count the number of completed assignments that meet certain criteria
-                            int? completedAssigments = tests.Count(t => t.IsCompleted && t.Type == Constants.TypeMultipleAssigment && (t.Result / t.GradeMax) * 100 > condition.RequiredIndividualAssigmentPercentage);
+                            int? completedAssigments = tests.Count(t => t.IsCompleted && t.Type == Constants.TypeMultipleAssigment && (t.Result / t.GradeMax) * 100 >= condition.RequiredIndividualAssigmentPercentage);
                             // Calculate the total result and max points for completed multiple assignments
                             double? totalAssigmentResult = tests.Sum(t => t.IsCompleted && t.Type == Constants.TypeMultipleAssigment ? t.Result : 0.0);
                             double? totalAssigmentMaxPoints = tests.Sum(t => t.IsCompleted && t.Type == Constants.TypeMultipleAssigment ? t.GradeMax : 0.0);
@@ -160,7 +160,7 @@ namespace MoodleExtensionAPI.Models
                             break;
 
                         case "bigTests":
-                            int completedBigTests = tests.Count(t => t.IsCompleted && t.Type == Constants.TypeBigTests && (t.Result / t.GradeMax) * 100 > condition.RequiredIndividualBigTestPercentage);
+                            int completedBigTests = tests.Count(t => t.IsCompleted && t.Type == Constants.TypeBigTests && (t.Result / t.GradeMax) * 100 >= condition.RequiredIndividualBigTestPercentage);
                             double? totalBigTestPercentage = tests.Sum(t => t.IsCompleted && t.Type == Constants.TypeBigTests ? t.Result : 0.0);
                             double? totalBigTestMaxPoints = tests.Sum(t => t.IsCompleted && t.Type == Constants.TypeBigTests ? t.GradeMax : 0.0);
                             double? averageBigTestPercentage = (totalBigTestPercentage / totalBigTestMaxPoints) * 100;
@@ -171,7 +171,7 @@ namespace MoodleExtensionAPI.Models
                             break;
 
                         case "smallTests":
-                            int completedSmallTests = tests.Count(t => t.IsCompleted && t.Type == Constants.TypeSmallTests && (t.Result / t.GradeMax) * 100 > condition.RequiredIndividualSmallTestPercentage);
+                            int completedSmallTests = tests.Count(t => t.IsCompleted && t.Type == Constants.TypeSmallTests && (t.Result / t.GradeMax) * 100 >= condition.RequiredIndividualSmallTestPercentage);
                             double? totalSmallTestsPercentage = tests.Sum(t => t.IsCompleted && t.Type == Constants.TypeSmallTests ? t.Result : 0.0);
                             double? totalSmallTestsMaxPoints = tests.Sum(t => t.IsCompleted && t.Type == Constants.TypeSmallTests ? t.GradeMax : 0.0);
                             double? averageSmallTestsPercentage = (totalSmallTestsPercentage / totalSmallTestsMaxPoints) * 100;

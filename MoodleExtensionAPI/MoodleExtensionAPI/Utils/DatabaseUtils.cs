@@ -212,7 +212,7 @@ namespace MoodleExtensionAPI.Utils
                                 GradeMin = item.grademin,
                                 Result = item.graderaw,
                                 Label = item.itemname,
-                                IsCompleted = (item.gradedatesubmitted != null),
+                                IsCompleted = (item.graderaw != null),
                                 Subject = context.Subjects.FirstOrDefault(s => s.SubjectMoodleID == sub.SubjectMoodleID),
                                 Student = context.Students.FirstOrDefault(s => s.MoodleID == grades.userid),
 
@@ -236,6 +236,7 @@ namespace MoodleExtensionAPI.Utils
                         {
                             Test savedTest = context.Tests.FirstOrDefault(t => t.MoodleTestID == item.id && t.Student.MoodleID == grades.userid);
                             savedTest.Result = item.graderaw;
+                            savedTest.IsCompleted = (item.graderaw != null);
                         }
 
                     }

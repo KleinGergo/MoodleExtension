@@ -1,90 +1,28 @@
-[
-  {
-    "neptunCode": "klein.gergo2000",
-    "tests": [
+{
+  "GradeCondition": {
+    "Type": "complex",
+    "Conditions": [
       {
-        "testName": "NagyZH1",
-        "type": "bigTests",
-        "gradeMax": 10,
-        "result": 10
+        "Type": "multipleAssigment",
+        "NumberOfAssigments": 1,
+        "RequiredNumberOfAssigments": 1,
+        "RequiredAvgAssigmentPercentage": 0,
+        "RequiredIndividualAssigmentPercentage": 60
       },
       {
-        "testName": "NagyZH2",
-        "type": "bigTests",
-        "gradeMax": 10,
-        "result": 10
+        "Type": "bigTests",
+        "RequiredIndividualBigTestPercentage": 0,
+        "RequiredAvgBigTestPercentage": 90,
+        "NumberOfBigTests": 5,
+        "RequiredNumberOfBigTests": 5
       },
       {
-        "testName": "NagyZH3",
-        "type": "bigTests",
-        "gradeMax": 10,
-        "result": 10
-      },
-      {
-        "testName": "NagyZH4",
-        "type": "bigTests",
-        "gradeMax": 10,
-        "result": 10
-      },
-      {
-        "testName": "NagyZH5",
-        "type": "bigTests",
-        "gradeMax": 10,
-        "result": null
-      },
-      {
-        "testName": "Beadandó",
-        "type": "multipleAssigment",
-        "gradeMax": 10,
-        "result": null
+        "Type": "offeredGrade",
+        "OfferedGradeAPercentage": 90,
+        "OfferedGradeBPercentage": 80,
+        "OfferedGradeCPercentage": 70,
+        "OfferedGradeDPercentage": 60
       }
-    ],
-    "signatureStatus": "approved",
-    "grade": "Jó",
-    "offeredGrade": "Jeles"
-  },
-  {
-    "neptunCode": "valami",
-    "tests": [
-      {
-        "testName": "NagyZH1",
-        "type": "bigTests",
-        "gradeMax": 10,
-        "result": 0
-      },
-      {
-        "testName": "NagyZH2",
-        "type": "bigTests",
-        "gradeMax": 10,
-        "result": null
-      },
-      {
-        "testName": "NagyZH3",
-        "type": "bigTests",
-        "gradeMax": 10,
-        "result": null
-      },
-      {
-        "testName": "NagyZH4",
-        "type": "bigTests",
-        "gradeMax": 10,
-        "result": null
-      },
-      {
-        "testName": "NagyZH5",
-        "type": "bigTests",
-        "gradeMax": 10,
-        "result": null
-      },
-      {
-        "testName": "Beadandó",
-        "type": "multipleAssigment",
-        "gradeMax": 10,
-        "result": null
-      }
-    ],
-    "signatureStatus": "denied",
-    "grade": "Elégtelen",
-    "offeredGrade": "Nincs megajánlott jegy"
+    ]
   }
-]
+}

@@ -145,15 +145,28 @@ namespace MoodleExtensionAPI.Utils
             {
                 return 0;
             }
-            double? lowestAssignmentPercentage = studentTestSignature.tests
-                .Where(t => t.Type == Constants.TypeMultipleAssigment && t.Result != null) // Filter tests of a specific type
+            double? lowestAssignmentPercentage = null;
+            double? lowestBigTestsPercentage = null;
+            double? lowestSmallTestPercentage = null;
+            if (requiredIndividualAssigmentPercentage > 0)
+            {
+                lowestAssignmentPercentage = studentTestSignature.tests
+                .Where(t => t.Type == Constants.TypeMultipleAssigment && t.Result != null && t.Result / t.GradeMax * 100 >= requiredIndividualAssigmentPercentage) // Filter tests of a specific type
                 .Min(t => (double)t.Result / t.GradeMax) * 100; // Calculate and find the minimum percentage
-            double? lowestBigTestsPercentage = studentTestSignature.tests
-               .Where(t => t.Type == Constants.TypeBigTests && t.Result != null) // Filter tests of a specific type
+            }
+            if (requiredIndividualBigTestPercentage > 0)
+            {
+                lowestBigTestsPercentage = studentTestSignature.tests
+              .Where(t => t.Type == Constants.TypeBigTests && t.Result != null && t.Result / t.GradeMax * 100 >= requiredIndividualBigTestPercentage) // Filter tests of a specific type
+              .Min(t => (double)t.Result / t.GradeMax) * 100; // Calculate and find the minimum percentage
+            }
+            if (requiredIndividualSmallTestPercentage > 0)
+            {
+                lowestSmallTestPercentage = studentTestSignature.tests
+               .Where(t => t.Type == Constants.TypeSmallTests && t.Result != null && t.Result / t.GradeMax * 100 >= requiredIndividualSmallTestPercentage) // Filter tests of a specific type
                .Min(t => (double)t.Result / t.GradeMax) * 100; // Calculate and find the minimum percentage
-            double? lowestSmallTestPercentage = studentTestSignature.tests
-               .Where(t => t.Type == Constants.TypeSmallTests && t.Result != null) // Filter tests of a specific type
-               .Min(t => (double)t.Result / t.GradeMax) * 100; // Calculate and find the minimum percentage
+            }
+
 
             double? minValue = Math.Min(lowestAssignmentPercentage ?? double.MaxValue, Math.Min(lowestBigTestsPercentage ?? double.MaxValue, lowestSmallTestPercentage ?? double.MaxValue));
             if (minValue >= gradingCondition.OfferedGradeAPercentage && gradingCondition.OfferedGradeAPercentage != 0)
@@ -183,9 +196,18 @@ namespace MoodleExtensionAPI.Utils
             }
             return false;
         }
+        public static bool IsAvgOfferedGradeCounts(OfferedGradeCondition conditions)
+        {
+            foreach (var condition in conditions.Conditions)
+            {
+                if (condition.RequiredAvgAssigmentPercentage > 0 || condition.RequiredAvgBigTestPercentage > 0 || condition.RequiredAvgSmallTestPercentage > 0)
+                    return true;
+            }
+            return false;
+        }
         public static string CalculateOfferedGrade(StudentTestSignature studentTestSignature, OfferedGradeCondition offeredGradeConditions, bool isOfferedGradeApproved)
         {
-            int offeredGrade = 0;
+            int? offeredGrade = null;
             if (!isOfferedGradeApproved)
             {
                 return "Nincs megajánlott jegy";
@@ -194,77 +216,163 @@ namespace MoodleExtensionAPI.Utils
             {
                 offeredGrade = CalculateForIndividualOfferedGrade(studentTestSignature, offeredGradeConditions, isOfferedGradeApproved);
             }
-
-            GradeCondition gradeConditions = new GradeCondition();
-            if (offeredGradeConditions != null)
+            if (IsAvgOfferedGradeCounts(offeredGradeConditions))
             {
-                if (offeredGradeConditions.Conditions != null)
+
+
+                GradeCondition gradeConditions = new GradeCondition();
+                double? requiredAvgAssigments = null;
+                double? requiredAvgBigTest = null;
+                double? requiredAvgSmallTest = null;
+                if (offeredGradeConditions != null)
                 {
-                    foreach (var condition in offeredGradeConditions.Conditions)
+                    if (offeredGradeConditions.Conditions != null)
                     {
-                        if (condition.Type == Constants.TypeOfferedGrade)
+                        foreach (var condition in offeredGradeConditions.Conditions)
                         {
-                            gradeConditions = condition;
+                            if (condition.Type == Constants.TypeOfferedGrade)
+                            {
+                                gradeConditions = condition;
+                            }
+                            if (condition.Type == Constants.TypeMultipleAssigment)
+                            {
+                                if (condition.RequiredAvgAssigmentPercentage != 0)
+                                    requiredAvgAssigments = condition.RequiredAvgAssigmentPercentage;
+                            }
+                            if (condition.Type == Constants.TypeBigTests)
+                            {
+                                if (condition.RequiredAvgBigTestPercentage != 0)
+                                    requiredAvgBigTest = condition.RequiredAvgBigTestPercentage;
+                            }
+                            if (condition.Type == Constants.TypeSmallTests)
+                            {
+                                if (condition.RequiredAvgSmallTestPercentage != 0)
+                                    requiredAvgSmallTest = condition.RequiredAvgSmallTestPercentage;
+                            }
+                        }
+
+                        if (gradeConditions != null)
+                        {
+                            double? assigmentTestResults = 0;
+                            double? assigmentMaxPoints = 0;
+
+                            double? bigTestsResults = 0;
+                            double? bigTestsMaxPoints = 0;
+
+                            double? smallTestResults = 0;
+                            double? smallTestMaxPoints = 0;
+                            foreach (var test in studentTestSignature.tests)
+                            {
+                                if (test.Type == Constants.TypeMultipleAssigment)
+                                {
+                                    assigmentMaxPoints += test.GradeMax;
+                                    if (test.Result != null)
+                                        assigmentTestResults += test.Result;
+
+                                }
+                                else if (test.Type == Constants.TypeBigTests)
+                                {
+                                    bigTestsMaxPoints += test.GradeMax;
+                                    if (test.Result != null)
+                                        bigTestsResults += test.Result;
+                                }
+                                else if (test.Type == Constants.TypeSmallTests)
+                                {
+                                    smallTestMaxPoints += test.GradeMax;
+                                    if (test.Result != null)
+                                        smallTestResults += test.Result;
+                                }
+                            }
+                            double? assigmentPercentage = null;
+                            double? bigTestPercentage = null;
+                            double? smallTestPercentage = null;
+                            if (assigmentTestResults != 0 && assigmentMaxPoints != 0 && requiredAvgAssigments != null)
+                            {
+                                assigmentPercentage = (assigmentTestResults / assigmentMaxPoints) * 100;
+                            }
+                            if (bigTestsResults != 0 && bigTestsMaxPoints != 0 && requiredAvgBigTest != null)
+                            {
+                                bigTestPercentage = (bigTestsResults / bigTestsMaxPoints) * 100;
+                            }
+                            if (smallTestResults != 0 && smallTestMaxPoints != 0 && requiredAvgSmallTest != null)
+                            {
+                                smallTestPercentage = (smallTestResults / smallTestMaxPoints) * 100;
+                            }
+                            int? avgOfferedGrade = GetOfferedGrade(assigmentPercentage, bigTestPercentage, smallTestPercentage, gradeConditions);
+                            return GetAppropiateOfferedGrade(offeredGrade, avgOfferedGrade);
                         }
                     }
 
-                    if (gradeConditions != null)
-                    {
-                        double? assigmentTestResults = 0;
-                        double? assigmentMaxPoints = 0;
-
-                        double? bigTestsResults = 0;
-                        double? bigTestsMaxPoints = 0;
-
-                        double? smallTestResults = 0;
-                        double? smallTestMaxPoints = 0;
-                        foreach (var test in studentTestSignature.tests)
-                        {
-                            if (test.Type == Constants.TypeMultipleAssigment)
-                            {
-                                assigmentMaxPoints += test.GradeMax;
-                                if (test.Result != null)
-                                    assigmentTestResults += test.Result;
-
-                            }
-                            else if (test.Type == Constants.TypeBigTests)
-                            {
-                                bigTestsMaxPoints += test.GradeMax;
-                                if (test.Result != null)
-                                    bigTestsResults += test.Result;
-                            }
-                            else if (test.Type == Constants.TypeSmallTests)
-                            {
-                                smallTestMaxPoints += test.GradeMax;
-                                if (test.Result != null)
-                                    smallTestResults += test.Result;
-                            }
-                        }
-                        double? assigmentPercentage = 0;
-                        double? bigTestPercentage = 0;
-                        double? smallTestPercentage = 0;
-                        if (assigmentTestResults != 0 && assigmentMaxPoints != 0)
-                        {
-                            assigmentPercentage = (assigmentTestResults / assigmentMaxPoints) * 100;
-                        }
-                        if (bigTestsResults != 0 && bigTestsMaxPoints != 0)
-                        {
-                            bigTestPercentage = (bigTestsResults / bigTestsMaxPoints) * 100;
-                        }
-                        if (smallTestResults != 0 && smallTestMaxPoints != 0)
-                        {
-                            smallTestPercentage = (smallTestResults / smallTestMaxPoints) * 100;
-                        }
-                        int? avgOfferedGrade = GetOfferedGrade(assigmentPercentage, bigTestPercentage, smallTestPercentage, gradeConditions);
-                        return GetAppropiateOfferedGrade(offeredGrade, avgOfferedGrade);
-                    }
                 }
+
+
             }
+
+            if (offeredGrade == 2)
+            {
+                return "Elégséges";
+            }
+            if (offeredGrade == 3)
+                return "Közepes";
+            if (offeredGrade == 4)
+                return "Jó";
+            if (offeredGrade == 5)
+                return "Jeles";
+
             return "Nincs megajánlott jegy";
 
+
         }
-        static string GetAppropiateOfferedGrade(int grade1, int? grade2)
+        static string GetAppropiateOfferedGrade(int? grade1, int? grade2)
         {
+            if (grade1 == null && grade2 == null)
+            {
+                return "Nincs megajánlott jegy";
+            }
+            if (grade1 == null && grade2 != null)
+            {
+                switch (grade2)
+                {
+                    case 0:
+                        return "Nincs megajánlott jegy";
+                        break;
+                    case 2:
+                        return "Elégséges";
+                        break;
+
+                    case 3:
+                        return "Közepes";
+                        break;
+                    case 4:
+                        return "Jó";
+                        break;
+                    case 5:
+                        return "Jeles";
+                        break;
+                }
+            }
+            if (grade1 != null && grade2 == null)
+            {
+                switch (grade1)
+                {
+                    case 0:
+                        return "Nincs megajánlott jegy";
+                        break;
+                    case 2:
+                        return "Elégséges";
+                        break;
+
+                    case 3:
+                        return "Közepes";
+                        break;
+                    case 4:
+                        return "Jó";
+                        break;
+                    case 5:
+                        return "Jeles";
+                        break;
+                }
+            }
             if (grade1 < grade2)
             {
                 switch (grade1)
@@ -372,9 +480,9 @@ namespace MoodleExtensionAPI.Utils
                                     smallTestResults += test.Result;
                             }
                         }
-                        double? assigmentPercentage = 0;
-                        double? bigTestPercentage = 0;
-                        double? smallTestPercentage = 0;
+                        double? assigmentPercentage = null;
+                        double? bigTestPercentage = null;
+                        double? smallTestPercentage = null;
                         if (assigmentTestResults != 0 && assigmentMaxPoints != 0 && assigmentWeight != 0)
                         {
                             assigmentPercentage = (assigmentTestResults / assigmentMaxPoints) * assigmentWeight;
@@ -400,19 +508,25 @@ namespace MoodleExtensionAPI.Utils
         public static int? GetOfferedGrade(double? assigmentPercentage, double? bigTestPercentage, double? smallTestPercentage, GradeCondition condition)
         {
             double divider = 0;
-            if (assigmentPercentage != 0)
+            double? percentage = 0;
+            if (assigmentPercentage != null)
             {
                 divider++;
+                percentage += assigmentPercentage;
             }
-            if (bigTestPercentage != 0)
+            if (bigTestPercentage != null)
             {
                 divider++;
+                percentage += bigTestPercentage;
             }
-            if (smallTestPercentage != 0)
+            if (smallTestPercentage != null)
             {
                 divider++;
+                percentage += smallTestPercentage;
             }
-            double? percentage = (assigmentPercentage + bigTestPercentage + smallTestPercentage) / divider;
+            if (divider != 0)
+                percentage = percentage / divider;
+
             if (percentage >= condition.OfferedGradeAPercentage)
             {
                 return 5;
@@ -437,15 +551,15 @@ namespace MoodleExtensionAPI.Utils
         public static string? GetGrade(double? assigmentPercentage, double? bigTestPercentage, double? smallTestPercentage, Condition condition)
         {
             double divider = 0;
-            if (assigmentPercentage != 0)
+            if (assigmentPercentage != null)
             {
                 divider++;
             }
-            if (bigTestPercentage != 0)
+            if (bigTestPercentage != null)
             {
                 divider++;
             }
-            if (smallTestPercentage != 0)
+            if (smallTestPercentage != null)
             {
                 divider++;
             }
