@@ -22,6 +22,6 @@ public class Constants
     public const string GradeD = "Elégséges";
     public const string GradeF = "Elégtelen";
     public const string AuthorizationToken = "64921d2d-2db9-4581-9d35-ce8c1f302d95";
-
+    public const string CorrectionTestSign = "javító";
 }
 

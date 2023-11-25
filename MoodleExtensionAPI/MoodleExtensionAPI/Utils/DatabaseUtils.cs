@@ -193,6 +193,17 @@ namespace MoodleExtensionAPI.Utils
                 context.SaveChanges();
             }
         }
+        public static int? GetPreviousTestID(Subject sub, string previousTestName)
+        {
+            using (var context = new Context())
+            {
+                Test test = context.Tests.FirstOrDefault(t => t.Label == previousTestName && t.Subject.SubjectID == sub.SubjectID);
+                return test.TestID;
+            }
+            return null;
+        }
+
+
         public static void SaveTests(Subject sub, APIGradesResponse tests)
         {
             using (var context = new Context())
@@ -202,6 +213,7 @@ namespace MoodleExtensionAPI.Utils
 
                     foreach (var item in grades.gradeitems)
                     {
+
                         if (!IsTestSaved(item.id, grades.userid) && item.itemmodule == Constants.Quiz)
                         {
 
@@ -217,6 +229,16 @@ namespace MoodleExtensionAPI.Utils
                                 Student = context.Students.FirstOrDefault(s => s.MoodleID == grades.userid),
 
                             };
+                            if (Utils.IsACorrectionTest(item.itemname))
+                            {
+                                string prevTest = StringUtils.GetCorrectedTestName(item.itemname);
+                                int? prevTestID = GetPreviousTestID(sub, prevTest);
+                                if (prevTestID != null)
+                                {
+                                    newTest.PreviousTestID = prevTestID;
+                                }
+
+                            }
                             if (item.itemname.Contains("NagyZH"))
                             {
                                 newTest.Type = Constants.TypeBigTests;
@@ -237,6 +259,16 @@ namespace MoodleExtensionAPI.Utils
                             Test savedTest = context.Tests.FirstOrDefault(t => t.MoodleTestID == item.id && t.Student.MoodleID == grades.userid);
                             savedTest.Result = item.graderaw;
                             savedTest.IsCompleted = (item.graderaw != null);
+                            if (Utils.IsACorrectionTest(item.itemname))
+                            {
+                                string prevTest = StringUtils.GetCorrectedTestName(item.itemname);
+                                int? prevTestID = GetPreviousTestID(sub, prevTest);
+                                if (prevTestID != null)
+                                {
+                                    savedTest.PreviousTestID = prevTestID;
+                                }
+
+                            }
                         }
 
                     }

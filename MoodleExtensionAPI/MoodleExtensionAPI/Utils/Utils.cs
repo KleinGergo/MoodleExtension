@@ -603,6 +603,12 @@ namespace MoodleExtensionAPI.Utils
             return studentTests;
 
         }
+        public static bool IsACorrectionTest(string testName)
+        {
+            if (testName.Contains(Constants.CorrectionTestSign))
+                return true;
+            return false;
+        }
     }
 }
 
