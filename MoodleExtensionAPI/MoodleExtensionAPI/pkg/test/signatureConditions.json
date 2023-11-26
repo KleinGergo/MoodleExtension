@@ -1,5 +1,5 @@
 {
-  "GradeCondition": {
+  "SignatureCondition": {
     "Type": "complex",
     "Conditions": [
       {
@@ -7,21 +7,24 @@
         "NumberOfAssigments": 1,
         "RequiredNumberOfAssigments": 1,
         "RequiredAvgAssigmentPercentage": 0,
-        "RequiredIndividualAssigmentPercentage": 60
+        "RequiredIndividualAssigmentPercentage": 50,
+        "Weight": 100
       },
       {
         "Type": "bigTests",
         "RequiredIndividualBigTestPercentage": 0,
-        "RequiredAvgBigTestPercentage": 90,
+        "RequiredAvgBigTestPercentage": 60,
+        "Weight": 100,
         "NumberOfBigTests": 5,
         "RequiredNumberOfBigTests": 5
       },
       {
-        "Type": "offeredGrade",
-        "OfferedGradeAPercentage": 90,
-        "OfferedGradeBPercentage": 80,
-        "OfferedGradeCPercentage": 70,
-        "OfferedGradeDPercentage": 60
+        "Type": "grading",
+        "GradeAPercentage": 90,
+        "GradeBPercentage": 80,
+        "GradeCPercentage": 70,
+        "GradeDPercentage": 60,
+        "IsCorrectionTestCanWorseTheGrade": false
       }
     ]
   }

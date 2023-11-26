@@ -193,11 +193,11 @@ namespace MoodleExtensionAPI.Utils
                 context.SaveChanges();
             }
         }
-        public static int? GetPreviousTestID(Subject sub, string previousTestName)
+        public static int? GetPreviousTestID(Subject sub, string previousTestName, int StudentMoodleID)
         {
             using (var context = new Context())
             {
-                Test test = context.Tests.FirstOrDefault(t => t.Label == previousTestName && t.Subject.SubjectID == sub.SubjectID);
+                Test test = context.Tests.FirstOrDefault(t => t.Label == previousTestName && t.Subject.SubjectID == sub.SubjectID && t.Student.MoodleID == StudentMoodleID);
                 return test.TestID;
             }
             return null;
@@ -232,7 +232,7 @@ namespace MoodleExtensionAPI.Utils
                             if (Utils.IsACorrectionTest(item.itemname))
                             {
                                 string prevTest = StringUtils.GetCorrectedTestName(item.itemname);
-                                int? prevTestID = GetPreviousTestID(sub, prevTest);
+                                int? prevTestID = GetPreviousTestID(sub, prevTest, grades.userid);
                                 if (prevTestID != null)
                                 {
                                     newTest.PreviousTestID = prevTestID;
@@ -262,7 +262,7 @@ namespace MoodleExtensionAPI.Utils
                             if (Utils.IsACorrectionTest(item.itemname))
                             {
                                 string prevTest = StringUtils.GetCorrectedTestName(item.itemname);
-                                int? prevTestID = GetPreviousTestID(sub, prevTest);
+                                int? prevTestID = GetPreviousTestID(sub, prevTest, grades.userid);
                                 if (prevTestID != null)
                                 {
                                     savedTest.PreviousTestID = prevTestID;
@@ -366,8 +366,10 @@ namespace MoodleExtensionAPI.Utils
 
                 foreach (var stud in students)
                 {
-                    List<Test> studTests = GetTestsForStudent(stud, sub);
+
                     SignatureCondition signatureCondition = sub.GetSignatureCondition();
+                    bool isCorrectionCanWorseTheGrade = Utils.IsCorrectionCanWorseTheResult(signatureCondition);
+                    List<Test> studTests = GetTestsForStudent(stud, sub, isCorrectionCanWorseTheGrade);
                     bool isSignatureApproved = sub.IsSignatureApproved(studTests, signatureCondition);
                     StudentTestSignature signature = new StudentTestSignature();
                     if (isSignatureApproved)
@@ -413,7 +415,7 @@ namespace MoodleExtensionAPI.Utils
             return results;
 
         }
-        public static List<Test> GetTestsForStudent(Student student, Subject sub)
+        public static List<Test> GetTestsForStudent(Student student, Subject sub, bool isCorrectionCanWorseTheGrade)
         {
             List<Test> tests = new List<Test>();
             using (var context = new Context())
@@ -425,6 +427,58 @@ namespace MoodleExtensionAPI.Utils
             .Where(t => t.Student.ID == student.ID)
             .ToList();
             }
+            if (isCorrectionCanWorseTheGrade)
+            {
+                List<int> correctedTestIDs = tests
+                    .Where(test => test.PreviousTestID != null)
+                    .Select(test => test.PreviousTestID.Value)
+                    .ToList();
+
+                tests = tests
+                    .Where(test => !correctedTestIDs.Contains(test.TestID))
+                    .ToList();
+            }
+            else
+            {
+                List<Test> testsToRemove = new List<Test>();
+
+                foreach (var test in tests)
+                {
+                    if (test.PreviousTestID != null)
+                    {
+                        foreach (var correctedTest in tests)
+                        {
+                            if (correctedTest.TestID == test.PreviousTestID)
+                            {
+                                if (correctedTest.Result == null)
+                                {
+                                    testsToRemove.Add(correctedTest);
+                                }
+                                else if (test.Result == null)
+                                {
+                                    testsToRemove.Add(test);
+                                }
+                                else if (correctedTest.Result > test.Result)
+                                {
+                                    testsToRemove.Add(test);
+                                }
+                                else
+                                {
+                                    testsToRemove.Add(correctedTest);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                foreach (var testToRemove in testsToRemove)
+                {
+                    tests.Remove(testToRemove);
+                }
+            }
+
+
+
             return tests;
         }
         public static bool IsTestSaved(int moodleTestID, int studentMoodleID)
@@ -505,7 +559,15 @@ namespace MoodleExtensionAPI.Utils
                 context.SaveChanges();
             }
         }
-
+        public static Teacher getTeacherByEmail(string email)
+        {
+            Teacher teacher = null;
+            using (var context = new Context())
+            {
+                teacher = context.Teachers.FirstOrDefault(t => t.Email == email);
+            }
+            return teacher;
+        }
         public static List<Test> GetResultsForSubject(string subjectIdentifier)
         {
             List<Test> results = new List<Test>();
@@ -520,6 +582,15 @@ namespace MoodleExtensionAPI.Utils
                 }
             }
             return results;
+        }
+        public static void AddPasswordToTeacher(Teacher teacher, string password)
+        {
+            using (var context = new Context())
+            {
+                Teacher pwTeacher = context.Teachers.FirstOrDefault(t => t.ID == teacher.ID);
+                pwTeacher.PasswordDb = HashUtils.HashString(password);
+                context.SaveChanges();
+            }
         }
 
     }

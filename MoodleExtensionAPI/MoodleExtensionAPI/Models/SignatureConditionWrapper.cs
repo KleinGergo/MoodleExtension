@@ -21,6 +21,7 @@
         public double? GradeBPercentage { get; set; }
         public double? GradeCPercentage { get; set; }
         public double? GradeDPercentage { get; set; }
+        public bool? IsCorrectionTestCanWorseTheGrade { get; set; }
         public double? OfferedGradeAPercentage { get; set; }
         public double? OfferedGradeBPercentage { get; set; }
         public double? OfferedGradeCPercentage { get; set; }

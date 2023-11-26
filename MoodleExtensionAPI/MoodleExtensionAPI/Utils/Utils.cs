@@ -4,6 +4,18 @@ namespace MoodleExtensionAPI.Utils
 {
     public static class Utils
     {
+
+        public static bool IsCorrectionCanWorseTheResult(SignatureCondition conditions)
+        {
+            foreach (var condition in conditions.Conditions)
+            {
+                if (condition.IsCorrectionTestCanWorseTheGrade == true)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
         public static APICourseResponse GetCourseFromAPIResponse(List<APICourseResponse> list, string course)
         {
             for (int i = 0; i < list.Count; i++)
@@ -551,19 +563,24 @@ namespace MoodleExtensionAPI.Utils
         public static string? GetGrade(double? assigmentPercentage, double? bigTestPercentage, double? smallTestPercentage, Condition condition)
         {
             double divider = 0;
+            double? percentage = 0;
             if (assigmentPercentage != null)
             {
                 divider++;
+                percentage += assigmentPercentage;
             }
             if (bigTestPercentage != null)
             {
                 divider++;
+                percentage += bigTestPercentage;
             }
             if (smallTestPercentage != null)
             {
                 divider++;
+                percentage += smallTestPercentage;
             }
-            double? percentage = (assigmentPercentage + bigTestPercentage + smallTestPercentage) / divider;
+
+            percentage = percentage / divider;
 
             if (percentage >= condition.GradeAPercentage)
             {

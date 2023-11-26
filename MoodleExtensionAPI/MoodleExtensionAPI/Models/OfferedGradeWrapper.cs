@@ -20,7 +20,7 @@
         public double? OfferedGradeBPercentage { get; set; }
         public double? OfferedGradeCPercentage { get; set; }
         public double? OfferedGradeDPercentage { get; set; }
-        public bool? IsAvgCount { get; set; }
+        public bool? IsCorrectionTestCanWorseTheGrade { get; set; }
 
         public GradeCondition()
         {

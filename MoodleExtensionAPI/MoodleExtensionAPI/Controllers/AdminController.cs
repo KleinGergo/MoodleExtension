@@ -32,9 +32,29 @@ namespace MoodleExtensionAPI.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+        [HttpPost("AddPasswordToTeacher")]
+        public async Task<IActionResult> AddPaswordToTeacher(string token, string email, string password)
+        {
+            try
+            {
+                if (token != Constants.AuthorizationToken)
+                {
+                    return BadRequest("Unauthorized");
+                }
+                Teacher teacher = DatabaseUtils.getTeacherByEmail(email);
+                if (teacher == null)
+                {
+                    return BadRequest("Thish email does not exists in the database.");
+                }
+                DatabaseUtils.AddPasswordToTeacher(teacher, password);
+                return Ok();
 
-
-
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
         }
 
 
