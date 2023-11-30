@@ -76,7 +76,6 @@ namespace MoodleExtensionAPI.Controllers
                 {
                     Subject subject = DatabaseUtils.GetSubject(subjectIdentifier);
                     DatabaseUtils.AddOfferedGradeConditionToSubject(subject, signatureCondition);
-
                 }
                 else
                 {
@@ -91,7 +90,6 @@ namespace MoodleExtensionAPI.Controllers
                         Subject subject = DatabaseUtils.GetSubject(subjectIdentifier);
                         DatabaseUtils.AddOfferedGradeConditionToSubject(subject, signatureCondition);
                     }
-
                 }
                 return Ok();
             }
@@ -99,7 +97,6 @@ namespace MoodleExtensionAPI.Controllers
             {
                 return BadRequest(ex.Message);
             }
-
         }
         [HttpPut("addSignatureCondition")]
         public async Task<IActionResult> AddSignatureCondition(string subjectIdentifier, string signatureCondition)
@@ -141,7 +138,12 @@ namespace MoodleExtensionAPI.Controllers
             {
                 if (!DatabaseUtils.CheckIfSubjectExists(subjectIdentifier))
                 {
-                    return new JsonResult(BadRequest("The subject does not exists!"));
+                    List<APICourseResponse> courses = await client.GetAPICourses();
+                    DatabaseUtils.SaveCourses(courses);
+                    if (!DatabaseUtils.CheckIfSubjectExists(subjectIdentifier))
+                    {
+                        return new JsonResult(BadRequest("The subject does not exists!"));
+                    }
                 }
 
                 Subject sub = DatabaseUtils.GetSubject(subjectIdentifier);
@@ -169,7 +171,7 @@ namespace MoodleExtensionAPI.Controllers
             {
                 if (!DatabaseUtils.CheckIfSubjectExists(subjectIdentifier))
                 {
-                    await GetCourses();
+                    await GetTestResultsForCourse(subjectIdentifier);
                     if (!DatabaseUtils.CheckIfSubjectExists(subjectIdentifier))
                     {
                         return new JsonResult(BadRequest("The subject does not exists!"));

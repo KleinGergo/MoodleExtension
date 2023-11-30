@@ -7,13 +7,17 @@ namespace MoodleExtensionAPI.Utils
 
         public static bool IsCorrectionCanWorseTheResult(SignatureCondition conditions)
         {
-            foreach (var condition in conditions.Conditions)
+            if (conditions != null)
             {
-                if (condition.IsCorrectionTestCanWorseTheGrade == true)
+                foreach (var condition in conditions.Conditions)
                 {
-                    return true;
+                    if (condition.IsCorrectionTestCanWorseTheGrade == true)
+                    {
+                        return true;
+                    }
                 }
             }
+
             return false;
         }
         public static APICourseResponse GetCourseFromAPIResponse(List<APICourseResponse> list, string course)

@@ -22,26 +22,6 @@ namespace MoodleExtensionAPI.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("MoodleExtensionAPI.Models.Semester", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Year")
-                        .HasColumnType("int");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("Semesters");
-                });
-
             modelBuilder.Entity("MoodleExtensionAPI.Models.Student", b =>
                 {
                     b.Property<int>("ID")
@@ -113,9 +93,6 @@ namespace MoodleExtensionAPI.Migrations
                     b.Property<string>("OfferedGrade")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("SemesterID")
-                        .HasColumnType("int");
-
                     b.Property<string>("SignatureState")
                         .HasColumnType("nvarchar(max)");
 
@@ -126,8 +103,6 @@ namespace MoodleExtensionAPI.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("TakenCourseID");
-
-                    b.HasIndex("SemesterID");
 
                     b.HasIndex("StudentID");
 
@@ -213,22 +188,6 @@ namespace MoodleExtensionAPI.Migrations
                     b.ToTable("Tests");
                 });
 
-            modelBuilder.Entity("MoodleExtensionAPI.Models.Training", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("Trainings");
-                });
-
             modelBuilder.Entity("SubjectTeacher", b =>
                 {
                     b.Property<int>("SubjectsSubjectID")
@@ -246,16 +205,12 @@ namespace MoodleExtensionAPI.Migrations
 
             modelBuilder.Entity("MoodleExtensionAPI.Models.TakenCourse", b =>
                 {
-                    b.HasOne("MoodleExtensionAPI.Models.Semester", null)
-                        .WithMany("TakenCourses")
-                        .HasForeignKey("SemesterID");
-
                     b.HasOne("MoodleExtensionAPI.Models.Student", "Student")
                         .WithMany("TakenCourses")
                         .HasForeignKey("StudentID");
 
                     b.HasOne("MoodleExtensionAPI.Models.Subject", "Subject")
-                        .WithMany()
+                        .WithMany("TakenCourses")
                         .HasForeignKey("SubjectID");
 
                     b.Navigation("Student");
@@ -297,11 +252,6 @@ namespace MoodleExtensionAPI.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("MoodleExtensionAPI.Models.Semester", b =>
-                {
-                    b.Navigation("TakenCourses");
-                });
-
             modelBuilder.Entity("MoodleExtensionAPI.Models.Student", b =>
                 {
                     b.Navigation("TakenCourses");
@@ -311,6 +261,8 @@ namespace MoodleExtensionAPI.Migrations
 
             modelBuilder.Entity("MoodleExtensionAPI.Models.Subject", b =>
                 {
+                    b.Navigation("TakenCourses");
+
                     b.Navigation("Tests");
                 });
 #pragma warning restore 612, 618

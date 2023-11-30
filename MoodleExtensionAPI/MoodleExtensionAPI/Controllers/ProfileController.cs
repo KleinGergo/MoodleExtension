@@ -19,7 +19,7 @@ namespace MoodleExtensionAPI.Controllers
             }
             else
             {
-                return BadRequest();
+                return Unauthorized("Login credentials are invalid");
             }
 
         }

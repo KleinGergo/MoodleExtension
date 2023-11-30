@@ -270,11 +270,10 @@ namespace MoodleExtensionAPI.Utils
 
                             }
                         }
-
+                        context.SaveChanges();
                     }
                 }
                 // Save changes to the database, including the tests and their associations with students.
-                context.SaveChanges();
             }
         }
         public static List<Test> GetStudentTestResults(string Neptuncode, Subject sub)

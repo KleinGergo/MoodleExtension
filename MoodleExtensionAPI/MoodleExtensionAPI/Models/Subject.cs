@@ -24,6 +24,8 @@ namespace MoodleExtensionAPI.Models
         public string? OfferedGradeCondition { get; set; }
         public List<Test>? Tests { get; } = new();
         public List<Teacher>? Teachers { get; } = new();
+        public List<TakenCourse>? TakenCourses { get; } = new();
+
 
 
 
@@ -131,17 +133,13 @@ namespace MoodleExtensionAPI.Models
         // IsSignatureApproved check if the list of tests, met with the signature condition.
         public bool IsSignatureApproved(List<Test> tests, SignatureCondition signatureCondition)
         {
-
-
             if (signatureCondition != null)
             {
                 foreach (var condition in signatureCondition.Conditions)
                 {
                     switch (condition.Type)
                     {
-
-
-                        case "multipleAssigment":
+                        case Constants.TypeMultipleAssigment:
 
                             // Count the number of completed assignments that meet certain criteria
                             int? completedAssigments = tests.Count(t => t.IsCompleted && t.Type == Constants.TypeMultipleAssigment && (t.Result / t.GradeMax) * 100 >= condition.RequiredIndividualAssigmentPercentage);
@@ -158,7 +156,6 @@ namespace MoodleExtensionAPI.Models
                                 return false;
                             // If both conditions are met, return true
                             break;
-
                         case "bigTests":
                             int completedBigTests = tests.Count(t => t.IsCompleted && t.Type == Constants.TypeBigTests && (t.Result / t.GradeMax) * 100 >= condition.RequiredIndividualBigTestPercentage);
                             double? totalBigTestPercentage = tests.Sum(t => t.IsCompleted && t.Type == Constants.TypeBigTests ? t.Result : 0.0);
@@ -169,7 +166,6 @@ namespace MoodleExtensionAPI.Models
                             else if (completedBigTests < condition.RequiredNumberOfBigTests)
                                 return false;
                             break;
-
                         case "smallTests":
                             int completedSmallTests = tests.Count(t => t.IsCompleted && t.Type == Constants.TypeSmallTests && (t.Result / t.GradeMax) * 100 >= condition.RequiredIndividualSmallTestPercentage);
                             double? totalSmallTestsPercentage = tests.Sum(t => t.IsCompleted && t.Type == Constants.TypeSmallTests ? t.Result : 0.0);
@@ -180,17 +176,11 @@ namespace MoodleExtensionAPI.Models
                             else if (completedSmallTests < condition.RequiredNumberOfSmallTests)
                                 return false;
                             break;
-
-
                     }
                 }
             }
-
-
             return true;
         }
-
-
     }
 
 

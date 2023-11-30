@@ -10,6 +10,9 @@ namespace MoodleExtensionAPI.Controllers
     public class AdminController : ControllerBase
     {
         MoodleAPIClient client = new MoodleAPIClient();
+
+
+
         [HttpPost("Initialization")]
         public async Task<IActionResult> Initialization(string token)
         {
@@ -17,7 +20,7 @@ namespace MoodleExtensionAPI.Controllers
             {
                 if (token != Constants.AuthorizationToken)
                 {
-                    return BadRequest("Unauthorized");
+                    return Unauthorized("Unauthorized");
                 }
                 List<APICourseResponse> courses = await client.GetAPICourses();
                 if (courses != null)
@@ -40,7 +43,8 @@ namespace MoodleExtensionAPI.Controllers
             {
                 if (token != Constants.AuthorizationToken)
                 {
-                    return BadRequest("Unauthorized");
+                    return Unauthorized
+                        ("Unauthorized");
                 }
                 Teacher teacher = DatabaseUtils.getTeacherByEmail(email);
                 if (teacher == null)
