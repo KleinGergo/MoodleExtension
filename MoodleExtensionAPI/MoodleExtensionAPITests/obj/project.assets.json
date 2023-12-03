@@ -5402,9 +5402,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\!Suli\\SZakdoga\\MoodleExtensionAPI\\MoodleExtension\\MoodleExtensionAPI\\MoodleExtensionAPITests\\MoodleExtensionAPITests.csproj",
+      "projectUniqueName": "D:\\!Suli\\Szakdoga\\MoodleExtensionAPI\\MoodleExtension\\MoodleExtensionAPI\\MoodleExtensionAPITests\\MoodleExtensionAPITests.csproj",
       "projectName": "MoodleExtensionAPITests",
-      "projectPath": "D:\\!Suli\\SZakdoga\\MoodleExtensionAPI\\MoodleExtension\\MoodleExtensionAPI\\MoodleExtensionAPITests\\MoodleExtensionAPITests.csproj",
+      "projectPath": "D:\\!Suli\\Szakdoga\\MoodleExtensionAPI\\MoodleExtension\\MoodleExtensionAPI\\MoodleExtensionAPITests\\MoodleExtensionAPITests.csproj",
       "packagesPath": "C:\\Users\\Gergo\\.nuget\\packages\\",
       "outputPath": "D:\\!Suli\\SZakdoga\\MoodleExtensionAPI\\MoodleExtension\\MoodleExtensionAPI\\MoodleExtensionAPITests\\obj\\",
       "projectStyle": "PackageReference",
@@ -5428,8 +5428,8 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "projectReferences": {
-            "D:\\!Suli\\SZakdoga\\MoodleExtensionAPI\\MoodleExtension\\MoodleExtensionAPI\\MoodleExtensionAPI\\MoodleExtensionAPI.csproj": {
-              "projectPath": "D:\\!Suli\\SZakdoga\\MoodleExtensionAPI\\MoodleExtension\\MoodleExtensionAPI\\MoodleExtensionAPI\\MoodleExtensionAPI.csproj"
+            "D:\\!Suli\\Szakdoga\\MoodleExtensionAPI\\MoodleExtension\\MoodleExtensionAPI\\MoodleExtensionAPI\\MoodleExtensionAPI.csproj": {
+              "projectPath": "D:\\!Suli\\Szakdoga\\MoodleExtensionAPI\\MoodleExtension\\MoodleExtensionAPI\\MoodleExtensionAPI\\MoodleExtensionAPI.csproj"
             }
           }
         }

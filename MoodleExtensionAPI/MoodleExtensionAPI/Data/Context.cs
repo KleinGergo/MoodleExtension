@@ -17,6 +17,11 @@ namespace MoodleExtensionAPI.Data
             optionsBuilder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=Stats;Trusted_Connection=True;");
 
         }
+        public void ApplyDatabaseMigrations()
+        {
+            Database.Migrate();
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 

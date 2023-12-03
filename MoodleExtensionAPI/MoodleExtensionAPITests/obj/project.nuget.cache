@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "AYS+X2lHTQj7eHt9AJGA/aR32z/g0iS3Q8khh5Mcx+ZGw8S5+0eFTnkCyzEiLcR+WYQs4BQeN8618iITY3JpsA==",
+  "dgSpecHash": "o6uoOP3+rpwWtcOGqxMYOZlsaVT2Rtx9w3TFZgtgbGzBOlNE76RzJDChJrhKdCfYoDJA0P7uiSs0jRE8pmkbpg==",
   "success": true,
-  "projectFilePath": "D:\\!Suli\\SZakdoga\\MoodleExtensionAPI\\MoodleExtension\\MoodleExtensionAPI\\MoodleExtensionAPITests\\MoodleExtensionAPITests.csproj",
+  "projectFilePath": "D:\\!Suli\\Szakdoga\\MoodleExtensionAPI\\MoodleExtension\\MoodleExtensionAPI\\MoodleExtensionAPITests\\MoodleExtensionAPITests.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Gergo\\.nuget\\packages\\azure.core\\1.24.0\\azure.core.1.24.0.nupkg.sha512",
     "C:\\Users\\Gergo\\.nuget\\packages\\azure.identity\\1.6.0\\azure.identity.1.6.0.nupkg.sha512",

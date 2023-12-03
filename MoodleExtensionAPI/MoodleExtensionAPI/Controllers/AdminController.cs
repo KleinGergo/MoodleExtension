@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MoodleExtensionAPI.Data;
 using MoodleExtensionAPI.Models;
 using MoodleExtensionAPI.Utils;
 
@@ -25,6 +26,8 @@ namespace MoodleExtensionAPI.Controllers
                 List<APICourseResponse> courses = await client.GetAPICourses();
                 if (courses != null)
                 {
+                    Context context = new Context();
+                    context.ApplyDatabaseMigrations();
                     DatabaseUtils.SaveCourses(courses);
                     DatabaseUtils.SaveUsersForAllCourse(client);
                 }

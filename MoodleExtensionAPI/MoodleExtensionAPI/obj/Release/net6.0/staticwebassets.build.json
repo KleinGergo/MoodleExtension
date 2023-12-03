@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "Ukw4wHOuDgkHM3DShQYlUbyuE/+1Fn68JnoAroPpgfU=",
+  "Source": "MoodleExtensionAPI",
+  "BasePath": "_content/MoodleExtensionAPI",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
